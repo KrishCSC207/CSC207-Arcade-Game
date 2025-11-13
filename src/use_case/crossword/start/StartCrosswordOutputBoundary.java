@@ -3,13 +3,9 @@ package use_case.crossword.start;
 public interface StartCrosswordOutputBoundary {
 
 
-    /**
-     * Present the loaded crossword to the user.
-     *
-     * @param puzzleId      the ID of the loaded puzzle
-     * @param imagePath     path to the image to display
-     * @param numSolutions  how many answers/textfields the UI should show
-     */
+    // puzzleId is the ID of hte loaded pouzzle
+    //imagePath is hte path to the image to display
+    // numSolutions is the number of words in the crossword being displaued
 
     void presentCrossword(String puzzleid, String imagepath, int numSolutions);
 }
