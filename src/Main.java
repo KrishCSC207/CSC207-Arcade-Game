@@ -2,6 +2,8 @@ import interface_adapters.crossword.*;
 import interface_adapters.crossword.data_access.LocalCrosswordPuzzleDataAccess;
 import use_case.crossword.*;
 import use_case.crossword.start.*;
+import use_case.crossword.submit.SubmitCrosswordInputBoundary;
+import use_case.crossword.submit.SubmitCrosswordInteractor;
 import view.crossword.CrosswordView;
 
 import javax.swing.*;
@@ -21,11 +23,13 @@ public class Main {
         // Data access (hardocdedd)
         CrosswordPuzzleDataAccessInterface dataAccess = new LocalCrosswordPuzzleDataAccess();
 
-        // Use case interactor
+        // Use case interactors
         StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(dataAccess, presenter);
 
+        SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(dataAccess, presenter);
+
         // Controller
-        CrosswordController controller = new CrosswordController(startInteractor);
+        CrosswordController controller = new CrosswordController(startInteractor, submitInteractor);
 
         // building ui
 

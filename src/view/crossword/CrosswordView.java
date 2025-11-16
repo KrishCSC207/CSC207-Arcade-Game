@@ -5,10 +5,14 @@ import interface_adapters.crossword.CrosswordViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CrosswordView extends JPanel {
+public class CrosswordView extends JPanel implements PropertyChangeListener {
 
     private final CrosswordController controller;
     private final CrosswordViewModel viewModel;
@@ -16,11 +20,16 @@ public class CrosswordView extends JPanel {
     private final JLabel imageLabel;
     private final JPanel answersPanel;
     private final List<JTextField> answerFields;
+    private final JButton answerButton;
+    private final JLabel feedbackLabel;
 
     public CrosswordView(CrosswordController controller, CrosswordViewModel viewModel) {
         this.controller = controller;
         this.viewModel = viewModel;
         this.answerFields = new ArrayList<>();
+        this.answerButton = new JButton("Submit!");
+        this.feedbackLabel = new JLabel(" ");
+        this.viewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
 
@@ -61,13 +70,35 @@ public class CrosswordView extends JPanel {
 
             answerFields.add(tf);
         }
+        answersPanel.add(answerButton);
+        answersPanel.add(feedbackLabel);
+        answerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource().equals(answerButton)) {
+                    List<String> userAnswers = new ArrayList<>();
+                    for (JTextField field : answerFields) {
+                        userAnswers.add(field.getText());
+                    }
+                    controller.submitAnswers(userAnswers);
+                }
+            }
+        });
+        //Important to add here the second button to change the view back to home page!!!
     }
 
-    public List<String> getUserAnswers() {
-        List<String> answers = new ArrayList<>();
-        for (JTextField field : answerFields) {
-            answers.add(field.getText());
+//    public List<String> getUserAnswers() {
+//        List<String> answers = new ArrayList<>();
+//        for (JTextField field : answerFields) {
+//            answers.add(field.getText());
+//        }
+//        return answers;
+//    }
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // Check if the "feedback" property changed
+        if ("feedbackMessage".equals(evt.getPropertyName())) {
+            String newMessage = (String) evt.getNewValue();
+            feedbackLabel.setText(newMessage);
         }
-        return answers;
     }
 }
