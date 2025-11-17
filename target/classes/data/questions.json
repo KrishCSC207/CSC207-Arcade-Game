@@ -1,0 +1,92 @@
+[
+  {
+    "questionId": "id001",
+    "imagePath": "data/images/id001_level2_answerB.png",
+    "level": 2,
+    "correctAnswer": "B"
+  },
+  {
+    "questionId": "id002",
+    "imagePath": "data/images/id002_level3_answerC.png",
+    "level": 3,
+    "correctAnswer": "C"
+  },
+  {
+    "questionId": "id003",
+    "imagePath": "data/images/id003_level1_answerD.png",
+    "level": 1,
+    "correctAnswer": "D"
+  },
+  {
+    "questionId": "id004",
+    "imagePath": "data/images/id004_level2_answerA.png",
+    "level": 2,
+    "correctAnswer": "A"
+  },
+  {
+    "questionId": "id005",
+    "imagePath": "data/images/id005_level3_answerB.png",
+    "level": 3,
+    "correctAnswer": "B"
+  },
+  {
+    "questionId": "id006",
+    "imagePath": "data/images/id006_level1_answerC.png",
+    "level": 1,
+    "correctAnswer": "C"
+  },
+  {
+    "questionId": "id007",
+    "imagePath": "data/images/id007_level2_answerD.png",
+    "level": 2,
+    "correctAnswer": "D"
+  },
+  {
+    "questionId": "id008",
+    "imagePath": "data/images/id008_level3_answerA.png",
+    "level": 3,
+    "correctAnswer": "A"
+  },
+  {
+    "questionId": "id009",
+    "imagePath": "data/images/id009_level1_answerB.png",
+    "level": 1,
+    "correctAnswer": "B"
+  },
+  {
+    "questionId": "id010",
+    "imagePath": "data/images/id010_level2_answerC.png",
+    "level": 2,
+    "correctAnswer": "C"
+  },
+  {
+    "questionId": "id011",
+    "imagePath": "data/images/id011_level3_answerD.png",
+    "level": 3,
+    "correctAnswer": "D"
+  },
+  {
+    "questionId": "id012",
+    "imagePath": "data/images/id012_level1_answerA.png",
+    "level": 1,
+    "correctAnswer": "A"
+  },
+  {
+    "questionId": "id013",
+    "imagePath": "data/images/id013_level2_answerB.png",
+    "level": 2,
+    "correctAnswer": "B"
+  },
+  {
+    "questionId": "id014",
+    "imagePath": "data/images/id014_level3_answerC.png",
+    "level": 3,
+    "correctAnswer": "C"
+  },
+  {
+    "questionId": "id015",
+    "imagePath": "data/images/id015_level1_answerD.png",
+    "level": 1,
+    "correctAnswer": "D"
+  }
+]
