@@ -1,9 +1,11 @@
 package com.csc207.arcade.multiplechoice.app;
 
 import com.csc207.arcade.multiplechoice.entities.QuizQuestion;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+//import com.google.gson.Gson;
+//import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,7 +32,7 @@ public class DataInitializer {
         // Get the images directory path
         String resourcesPath = "src/main/resources/data/images/";
         File imagesDir = new File(resourcesPath);
-        
+
         if (!imagesDir.exists() || !imagesDir.isDirectory()) {
             System.out.println("Images directory not found at: " + resourcesPath);
             System.out.println("Creating sample questions.json with demo data...");
@@ -39,7 +41,7 @@ public class DataInitializer {
         }
 
         File[] imageFiles = imagesDir.listFiles((dir, name) -> name.endsWith(".png"));
-        
+
         if (imageFiles == null || imageFiles.length == 0) {
             System.out.println("No image files found. Creating sample questions.json...");
             createSampleData();
@@ -47,22 +49,22 @@ public class DataInitializer {
         }
 
         List<QuizQuestion> questions = new ArrayList<>();
-        
+
         for (File imageFile : imageFiles) {
             String filename = imageFile.getName();
             Matcher matcher = FILENAME_PATTERN.matcher(filename);
-            
+
             if (matcher.matches()) {
                 String questionId = matcher.group(1);
                 int level = Integer.parseInt(matcher.group(2));
                 String correctAnswer = matcher.group(3);
                 String imagePath = "data/images/" + filename;
-                
+
                 QuizQuestion question = new QuizQuestion(questionId, imagePath, level, correctAnswer);
                 questions.add(question);
             }
         }
-        
+
         saveQuestionsToJson(questions);
     }
 
@@ -71,17 +73,17 @@ public class DataInitializer {
      */
     private static void createSampleData() {
         List<QuizQuestion> sampleQuestions = new ArrayList<>();
-        
+
         // Create 15 sample questions
         for (int i = 1; i <= 15; i++) {
             String id = String.format("id%03d", i);
             int level = (i % 3) + 1; // Levels 1-3
             String answer = String.valueOf((char)('A' + (i % 4))); // Rotate through A, B, C, D
             String imagePath = "data/images/" + id + "_level" + level + "_answer" + answer + ".png";
-            
+
             sampleQuestions.add(new QuizQuestion(id, imagePath, level, answer));
         }
-        
+
         saveQuestionsToJson(sampleQuestions);
     }
 
@@ -89,17 +91,28 @@ public class DataInitializer {
      * Saves the questions list to JSON file.
      */
     private static void saveQuestionsToJson(List<QuizQuestion> questions) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(questions);
-        
+        JSONArray jsonArray = new JSONArray();
+
+        for (QuizQuestion q : questions) {
+            JSONObject obj = new JSONObject();
+
+            obj.put("questionId", q.getQuestionId());
+            obj.put("imagePath", q.getImagePath());
+            obj.put("level", q.getLevel());
+            obj.put("correctAnswer", q.getCorrectAnswer());
+
+            jsonArray.put(obj);
+        }
+
         String outputPath = "src/main/resources/data/questions.json";
         File outputFile = new File(outputPath);
-        
-        // Create parent directories if they don't exist
-        outputFile.getParentFile().mkdirs();
-        
+
+        if (outputFile.getParentFile() != null) {
+            outputFile.getParentFile().mkdirs();
+        }
+
         try (FileWriter writer = new FileWriter(outputFile)) {
-            writer.write(json);
+            writer.write(jsonArray.toString(2));
             System.out.println("Successfully generated questions.json with " + questions.size() + " questions.");
         } catch (IOException e) {
             System.err.println("Error writing questions.json: " + e.getMessage());
