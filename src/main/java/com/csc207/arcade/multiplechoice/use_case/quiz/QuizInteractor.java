@@ -6,41 +6,39 @@ import com.csc207.arcade.multiplechoice.use_case.QuestionDAI;
 
 import java.util.List;
 
-/**
- * Interactor for starting a quiz and loading the first question.
- */
 public class QuizInteractor implements QuizInputBoundary {
-    private final QuestionDAI questionDAI;
+    private final QuestionDAI questionDAO;
     private final QuizOutputBoundary quizPresenter;
     private QuizSession currentSession;
 
-    public QuizInteractor(QuestionDAI questionDAI, QuizOutputBoundary quizPresenter) {
-        this.questionDAI = questionDAI;
+    public QuizInteractor(QuestionDAI questionDAO, QuizOutputBoundary quizPresenter) {
+        this.questionDAO = questionDAO;
         this.quizPresenter = quizPresenter;
     }
 
     @Override
     public void execute(QuizInputData inputData) {
-        // Load 15 questions
-        List<QuizQuestion> questions = questionDAI.getQuestions(15);
-        
-        // Create a new quiz session
+        // 1) 读取难度（可能为 null，表示不过滤）
+        String category = inputData.getCategory();
+
+        // 2) 按难度（若有）抽取 15 道题
+        List<QuizQuestion> questions = questionDAO.getCategorizedQuestions(category);
+
+        // 3) 建立会话
         currentSession = new QuizSession(questions);
-        
-        // Get the first question
+
+        // 4) 取第一题并构造输出
         QuizQuestion firstQuestion = currentSession.getCurrentQuestion();
-        
-        // Prepare output data
-        String progressLabel = String.format("Question %d/%d", 
-            currentSession.getCurrentQuestionIndex() + 1, 
-            currentSession.getTotalQuestions());
-        
+        String progressLabel = String.format("Question %d/%d",
+                currentSession.getCurrentQuestionIndex() + 1,
+                currentSession.getTotalQuestions());
+
         QuizOutputData outputData = new QuizOutputData(
-            firstQuestion.getImagePath(), 
-            progressLabel
+                firstQuestion.getImagePath(),
+                progressLabel
         );
-        
-        // Send to presenter
+
+        // 5) 通知 Presenter 刷新视图
         quizPresenter.prepareQuizView(outputData);
     }
 

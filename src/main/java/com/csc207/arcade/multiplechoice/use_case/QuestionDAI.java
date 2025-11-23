@@ -18,7 +18,7 @@ public interface QuestionDAI {
      * @param count Number of questions to retrieve
      * @return List of random QuizQuestion objects
      */
-    List<QuizQuestion> getQuestions(int count);
+    // List<QuizQuestion> getQuestions(int count);
 
     List<QuizQuestion> getCategorizedQuestions(String category);
 }

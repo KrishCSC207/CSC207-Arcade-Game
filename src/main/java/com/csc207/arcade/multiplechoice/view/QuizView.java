@@ -136,7 +136,7 @@ public class QuizView extends JFrame implements PropertyChangeListener {
             }
             autoAdvanceTimer = new Timer(1000, e -> {
                 // Advance to next question after showing the green highlight
-                controller.advanceToNextQuestion();
+                controller.nextQuestion();
                 autoAdvanceTimer.stop();
             });
             autoAdvanceTimer.setRepeats(false);

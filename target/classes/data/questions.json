@@ -1,92 +1,74 @@
 [
   {
-    "questionId": "id013",
-    "category": 2,
+    "questionId": "id1",
+    "category": "Module 0",
     "imagePath": "data/images/id013_level2_answerB.png",
     "correctAnswer": "B"
   },
   {
-    "questionId": "id010",
-    "category": 2,
+    "questionId": "id2",
+    "category": "Module 0",
     "imagePath": "data/images/id010_level2_answerC.png",
     "correctAnswer": "C"
   },
   {
-    "questionId": "id006",
-    "category": 1,
+    "questionId": "id3",
+    "category": "Module 1",
     "imagePath": "data/images/id006_level1_answerC.png",
     "correctAnswer": "C"
   },
   {
-    "questionId": "id015",
-    "category": 1,
+    "questionId": "id4",
+    "category": "Module 1",
     "imagePath": "data/images/id015_level1_answerD.png",
     "correctAnswer": "D"
   },
   {
-    "questionId": "id014",
-    "category": 3,
+    "questionId": "id5",
+    "category": "Module 2",
     "imagePath": "data/images/id014_level3_answerC.png",
     "correctAnswer": "C"
   },
   {
-    "questionId": "id002",
-    "category": 3,
+    "questionId": "id6",
+    "category": "Module 2",
     "imagePath": "data/images/id002_level3_answerC.png",
     "correctAnswer": "C"
   },
   {
-    "questionId": "id003",
-    "category": 1,
+    "questionId": "id7",
+    "category": "Module 3",
     "imagePath": "data/images/id003_level1_answerD.png",
     "correctAnswer": "D"
   },
   {
-    "questionId": "id011",
-    "category": 3,
+    "questionId": "id8",
+    "category": "Module 3",
     "imagePath": "data/images/id011_level3_answerD.png",
     "correctAnswer": "D"
   },
   {
-    "questionId": "id012",
-    "category": 1,
+    "questionId": "id9",
+    "category": "Module 4",
     "imagePath": "data/images/id012_level1_answerA.png",
     "correctAnswer": "A"
   },
   {
-    "questionId": "id004",
-    "category": 2,
+    "questionId": "id10",
+    "category": "Module 4",
     "imagePath": "data/images/id004_level2_answerA.png",
     "correctAnswer": "A"
   },
   {
-    "questionId": "id007",
-    "category": 2,
+    "questionId": "id11",
+    "category": "Module 5",
     "imagePath": "data/images/id007_level2_answerD.png",
     "correctAnswer": "D"
   },
   {
-    "questionId": "id008",
-    "category": 3,
+    "questionId": "id12",
+    "category": "Module 5",
     "imagePath": "data/images/id008_level3_answerA.png",
     "correctAnswer": "A"
-  },
-  {
-    "questionId": "id001",
-    "category": 2,
-    "imagePath": "data/images/id001_level2_answerB.png",
-    "correctAnswer": "B"
-  },
-  {
-    "questionId": "id005",
-    "category": 3,
-    "imagePath": "data/images/id005_level3_answerB.png",
-    "correctAnswer": "B"
-  },
-  {
-    "questionId": "id009",
-    "category": 1,
-    "imagePath": "data/images/id009_level1_answerB.png",
-    "correctAnswer": "B"
   }
 ]

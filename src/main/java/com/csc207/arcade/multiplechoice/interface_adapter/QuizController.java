@@ -1,49 +1,44 @@
 package com.csc207.arcade.multiplechoice.interface_adapter;
 
-import com.csc207.arcade.multiplechoice.use_case.quiz.QuizInputBoundary;
 import com.csc207.arcade.multiplechoice.use_case.quiz.QuizInputData;
-import com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInputBoundary;
+import com.csc207.arcade.multiplechoice.use_case.quiz.QuizInteractor;
 import com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInputData;
+import com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor;
 
 /**
- * Controller that handles user interactions for the quiz.
+ * Controller 仅负责把界面动作转换为用例输入。
+ * 不依赖 Presenter，实现与展示层解耦。
  */
 public class QuizController {
-    private final QuizInputBoundary quizInteractor;
-    private final SubmitAnswerInputBoundary submitAnswerInteractor;
+    private final QuizInteractor quizInteractor;
+    private SubmitAnswerInteractor submitAnswerInteractor;
 
-    public QuizController(QuizInputBoundary quizInteractor, 
-                         SubmitAnswerInputBoundary submitAnswerInteractor) {
+    public QuizController(QuizInteractor quizInteractor) {
         this.quizInteractor = quizInteractor;
+    }
+
+    public void startQuiz(String category) {
+        quizInteractor.execute(new QuizInputData(category));
+    }
+
+    public void setSubmitAnswerInteractor(SubmitAnswerInteractor submitAnswerInteractor) {
         this.submitAnswerInteractor = submitAnswerInteractor;
     }
 
-    /**
-     * Starts a new quiz.
-     */
-    public void startQuiz() {
-        QuizInputData inputData = new QuizInputData();
-        quizInteractor.execute(inputData);
+    public boolean hasSubmitAnswerInteractor() {
+        return submitAnswerInteractor != null;
     }
 
-    /**
-     * Submits an answer for the current question.
-     *
-     * @param answer The selected answer (A, B, C, or D)
-     */
     public void submitAnswer(String answer) {
-        SubmitAnswerInputData inputData = new SubmitAnswerInputData(answer);
-        submitAnswerInteractor.execute(inputData);
+        if (submitAnswerInteractor != null) {
+            SubmitAnswerInputData inputData = new SubmitAnswerInputData(answer);
+            submitAnswerInteractor.execute(inputData);
+        }
     }
-    
-    /**
-     * Advances to the next question.
-     * Called by the view after showing feedback for a correct answer.
-     */
-    public void advanceToNextQuestion() {
-        if (submitAnswerInteractor instanceof com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) {
-            ((com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor) submitAnswerInteractor)
-                .advanceToNextQuestion();
+
+    public void nextQuestion() {
+        if (submitAnswerInteractor != null) {
+            submitAnswerInteractor.advance();
         }
     }
 }
