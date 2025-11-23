@@ -7,7 +7,7 @@ package com.csc207.arcade.multiplechoice.entities;
 public class QuizQuestion {
     private String questionId;
     private String imagePath;
-    private int level;
+    private String category;
     private String correctAnswer;
 
     /**
@@ -21,13 +21,13 @@ public class QuizQuestion {
      *
      * @param questionId    Unique identifier for the question
      * @param imagePath     Path to the question image (relative to resources)
-     * @param level         Difficulty level of the question
+     * @param category      Category of the question
      * @param correctAnswer The correct answer (A, B, C, or D)
      */
-    public QuizQuestion(String questionId, String imagePath, int level, String correctAnswer) {
+    public QuizQuestion(String questionId, String imagePath, String category, String correctAnswer) {
         this.questionId = questionId;
         this.imagePath = imagePath;
-        this.level = level;
+        this.category = category;
         this.correctAnswer = correctAnswer;
     }
 
@@ -47,12 +47,8 @@ public class QuizQuestion {
         this.imagePath = imagePath;
     }
 
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
+    public String getCategory() {
+        return category;
     }
 
     public String getCorrectAnswer() {

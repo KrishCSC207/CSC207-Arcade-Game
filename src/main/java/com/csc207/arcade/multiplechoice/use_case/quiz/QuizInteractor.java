@@ -2,7 +2,7 @@ package com.csc207.arcade.multiplechoice.use_case.quiz;
 
 import com.csc207.arcade.multiplechoice.entities.QuizQuestion;
 import com.csc207.arcade.multiplechoice.entities.QuizSession;
-import com.csc207.arcade.multiplechoice.use_case.QuestionRepository;
+import com.csc207.arcade.multiplechoice.use_case.QuestionDAI;
 
 import java.util.List;
 
@@ -10,19 +10,19 @@ import java.util.List;
  * Interactor for starting a quiz and loading the first question.
  */
 public class QuizInteractor implements QuizInputBoundary {
-    private final QuestionRepository questionRepository;
+    private final QuestionDAI questionDAI;
     private final QuizOutputBoundary quizPresenter;
     private QuizSession currentSession;
 
-    public QuizInteractor(QuestionRepository questionRepository, QuizOutputBoundary quizPresenter) {
-        this.questionRepository = questionRepository;
+    public QuizInteractor(QuestionDAI questionDAI, QuizOutputBoundary quizPresenter) {
+        this.questionDAI = questionDAI;
         this.quizPresenter = quizPresenter;
     }
 
     @Override
     public void execute(QuizInputData inputData) {
         // Load 15 questions
-        List<QuizQuestion> questions = questionRepository.getQuestions(15);
+        List<QuizQuestion> questions = questionDAI.getQuestions(15);
         
         // Create a new quiz session
         currentSession = new QuizSession(questions);

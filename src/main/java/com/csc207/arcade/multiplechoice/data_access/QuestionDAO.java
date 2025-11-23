@@ -1,11 +1,10 @@
 package com.csc207.arcade.multiplechoice.data_access;
 
 import com.csc207.arcade.multiplechoice.entities.QuizQuestion;
-import com.csc207.arcade.multiplechoice.use_case.QuestionRepository;
+import com.csc207.arcade.multiplechoice.use_case.QuestionDAI;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -16,11 +15,11 @@ import java.util.List;
 /**
  * Repository implementation that reads questions from a JSON file.
  */
-public class JsonQuestionRepository implements QuestionRepository {
+public class QuestionDAO implements QuestionDAI {
     private List<QuizQuestion> allQuestions;
 //    private final Gson gson;
 
-    public JsonQuestionRepository() {
+    public QuestionDAO() {
 //        this.gson = new Gson();
         this.allQuestions = new ArrayList<>();
     }
@@ -47,7 +46,6 @@ public class JsonQuestionRepository implements QuestionRepository {
 
                 q.setQuestionId(obj.optString("questionId"));
                 q.setImagePath(obj.optString("imagePath"));
-                q.setLevel(obj.optInt("level", 1));
                 q.setCorrectAnswer(obj.optString("correctAnswer"));
 
                 allQuestions.add(q);
@@ -71,5 +69,17 @@ public class JsonQuestionRepository implements QuestionRepository {
         
         int actualCount = Math.min(count, shuffled.size());
         return shuffled.subList(0, actualCount);
+    }
+
+    @Override
+    public List<QuizQuestion> getCategorizedQuestions(String category) {
+        loadData();
+        List<QuizQuestion> categorizedQuestions = new ArrayList<>();
+        for (QuizQuestion q : allQuestions) {
+            if (q.getCategory().equals(category)) {
+                categorizedQuestions.add(q);
+            }
+        }
+        return categorizedQuestions;
     }
 }

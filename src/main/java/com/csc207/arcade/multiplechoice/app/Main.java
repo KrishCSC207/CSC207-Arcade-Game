@@ -1,21 +1,5 @@
 package com.csc207.arcade.multiplechoice.app;
 
-import com.csc207.arcade.multiplechoice.data_access.JsonQuestionRepository;
-import com.csc207.arcade.multiplechoice.interface_adapter.QuizController;
-import com.csc207.arcade.multiplechoice.interface_adapter.QuizPresenter;
-import com.csc207.arcade.multiplechoice.interface_adapter.QuizViewModel;
-import com.csc207.arcade.multiplechoice.interface_adapter.ResultsViewModel;
-import com.csc207.arcade.multiplechoice.use_case.QuestionRepository;
-import com.csc207.arcade.multiplechoice.use_case.quiz.QuizInteractor;
-import com.csc207.arcade.multiplechoice.use_case.submit.SubmitAnswerInteractor;
-import com.csc207.arcade.multiplechoice.view.QuizView;
-import com.csc207.arcade.multiplechoice.view.ResultsView;
-import com.csc207.arcade.multiplechoice.app.AppBuilder;
-
-import javax.swing.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 /**
  * Main entry point for the Multiple Choice Quiz application.
  */
@@ -26,7 +10,7 @@ public class Main {
 //        DataInitializer.run();
 //
 //        // Step 2: Dependency Injection - Create all components
-//        QuestionRepository repository = new JsonQuestionRepository();
+//        QuestionDAI repository = new QuestionDAO();
 //        repository.loadData();
 //
 //        QuizViewModel quizViewModel = new QuizViewModel();

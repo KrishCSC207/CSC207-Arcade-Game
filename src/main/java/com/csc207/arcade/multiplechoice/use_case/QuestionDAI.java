@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Interface defining the contract for data access to quiz questions.
  */
-public interface QuestionRepository {
+public interface QuestionDAI {
     /**
      * Loads data from the data source.
      */
@@ -19,4 +19,6 @@ public interface QuestionRepository {
      * @return List of random QuizQuestion objects
      */
     List<QuizQuestion> getQuestions(int count);
+
+    List<QuizQuestion> getCategorizedQuestions(String category);
 }
