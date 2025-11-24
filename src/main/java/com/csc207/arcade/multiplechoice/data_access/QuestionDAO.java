@@ -48,10 +48,9 @@ public class QuestionDAO implements QuestionDAI {
     @Override
     public List<QuizQuestion> getCategorizedQuestions(String category) {
         loadData();
-        String target = category;
         List<QuizQuestion> result = new ArrayList<>();
         for (QuizQuestion question : allQuestions) {
-            if (question.getCategory().equals(target)) {
+            if (question.getCategory().equals(category)) {
                 result.add(question);
             }
         }
