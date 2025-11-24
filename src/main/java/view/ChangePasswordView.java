@@ -43,6 +43,8 @@ public class ChangePasswordView extends JPanel implements PropertyChangeListener
         JPanel inputPanel = new JPanel();
         inputPanel.add(new JLabel("New Password:"));
         inputPanel.add(passwordField);
+        // Prevent input panel from stretching vertically
+        inputPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
         // Change Password button
         submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -66,7 +68,15 @@ public class ChangePasswordView extends JPanel implements PropertyChangeListener
 
         this.add(usernameInfo);
         this.add(username);
+
+        // Space between username and the input field
+        this.add(Box.createVerticalStrut(20));
+
         this.add(inputPanel);
+
+        // Space between input field and buttons
+        this.add(Box.createVerticalStrut(30));
+
         this.add(bottomButtons);
     }
 

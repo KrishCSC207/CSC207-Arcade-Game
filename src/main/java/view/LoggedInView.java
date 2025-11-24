@@ -25,6 +25,13 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private final JLabel username;
 
+    // UPDATED: Changed default time to "00:00"
+    private String bestCrosswordTime = "00:00";
+    private String highestScore = "0";
+
+    private final JLabel bestTimeLabel;
+    private final JLabel highScoreLabel;
+
     private final JButton multipleChoiceBtn;
     private final JButton crosswordBtn;
     private final JButton connectionsBtn;
@@ -40,18 +47,24 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Username
-        JLabel usernameInfo = new JLabel("Currently logged in as: ");
-        usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        username = new JLabel();
+        // --- 1. Title Section (Hello, User) ---
+        username = new JLabel("Hello, ");
+        username.setFont(new Font("Arial", Font.BOLD, 15));
         username.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Menu section (3 vertical buttons)
+        // --- 2. Stats Section ---
+        bestTimeLabel = new JLabel("Best Crossword Time: " + bestCrosswordTime);
+        bestTimeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        highScoreLabel = new JLabel("Highest Multiple Choice Score: " + highestScore);
+        highScoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // --- 3. Minigames Menu Section ---
         JPanel menuButtons = new JPanel();
         menuButtons.setLayout(new BoxLayout(menuButtons, BoxLayout.Y_AXIS));
         menuButtons.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Buttons
         multipleChoiceBtn = new JButton("Multiple Choice");
         multipleChoiceBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -61,32 +74,40 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         connectionsBtn = new JButton("Connections");
         connectionsBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Add components to menu panel
         menuButtons.add(multipleChoiceBtn);
         menuButtons.add(crosswordBtn);
         menuButtons.add(connectionsBtn);
 
-        // Bottom buttons: Logout + Change Password
+        // --- 4. Bottom Buttons ---
         JPanel bottomButtons = new JPanel();
-
         logOut = new JButton("Log Out");
         changePassword = new JButton("Change Password");
-
         bottomButtons.add(logOut);
         bottomButtons.add(changePassword);
 
         // Actions
         logOut.addActionListener(this);
-
         changePassword.addActionListener(e -> {
             viewManagerModel.setState("change password");
             viewManagerModel.firePropertyChange();
         });
 
-        // Add components to layout
-        this.add(usernameInfo);
+        // --- Assemble the Main View with Spacing ---
+
+        // Add some space at the very top
         this.add(username);
 
+        // Space between "Hello" and Stats
+        this.add(Box.createVerticalStrut(15));
+        this.add(bestTimeLabel);
+        this.add(highScoreLabel);
+
+        // Space between Stats and Minigames
+        this.add(Box.createVerticalStrut(15));
         this.add(menuButtons);
+
+        // Push bottom buttons to the bottom
         this.add(bottomButtons);
     }
 
@@ -105,7 +126,8 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
             LoggedInState state = (LoggedInState) evt.getNewValue();
-            username.setText(state.getUsername());
+            // UPDATED: Concatenate "Hello, " with the username
+            username.setText("Hello, " + state.getUsername());
         }
     }
 
