@@ -17,7 +17,6 @@ public class SubmitCrosswordInteractor implements SubmitCrosswordInputBoundary {
     @Override
     public void execute(SubmitCrosswordInputData inputData) {
         List<String> userAnswers = inputData.getUserAnswers();
-
         List<String> correctAnswers = dataAccess.getCurrentPuzzleSolutions();
 
         boolean allCorrect = true;
@@ -25,7 +24,15 @@ public class SubmitCrosswordInteractor implements SubmitCrosswordInputBoundary {
             allCorrect = false;
         } else {
             for (int i = 0; i < userAnswers.size(); i++) {
-                if (!userAnswers.get(i).trim().equalsIgnoreCase(correctAnswers.get(i))) {
+                String userAnswer = userAnswers.get(i).trim().toLowerCase();
+                boolean found = false;
+                for (int j = 0; j < correctAnswers.size(); j++) {
+                    if (userAnswer.equals(correctAnswers.get(j).trim().toLowerCase())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     allCorrect = false;
                     break;
                 }

@@ -1,19 +1,23 @@
-package src.view.crossword;
+package view.crossword;
 
+import java.awt.*;
 import javax.swing.*;
+
 
 public class ExitPage extends JPanel {
     public ExitPage() {
-        JFrame frame = new JFrame("Wordsearch Page");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-        frame.setResizable(true);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.add(new JLabel("Thank you for Playing!"));
-        buttonPanel.add(new JLabel("Your time was: ")); //to be implemented by partner
-        buttonPanel.add(new JLabel("Awesome work!"));
-        buttonPanel.add(new JButton("Please click to return home!"));
-        frame.add(buttonPanel);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+
+        add(new JLabel("Thank you for Playing!"));
+        add(Box.createVerticalStrut(12));
+        add(new JLabel("Your time was: ")); // partner will set this later
+        add(Box.createVerticalStrut(12));
+        add(new JLabel("Awesome work!"));
+
+        // Optional: a button to go back to Decision later
+        // JButton home = new JButton("Return to Home");
+        // add(Box.createVerticalStrut(16));
+        // add(home);
     }
 }

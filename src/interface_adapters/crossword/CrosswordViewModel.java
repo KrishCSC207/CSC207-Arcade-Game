@@ -11,6 +11,7 @@ public class CrosswordViewModel {
     private String imagePath;
     private int numSolutions;
     private String statusMessage;
+    private boolean completed;
 
     private String feedbackMessage;
     private boolean submissionCorrect;
@@ -22,6 +23,16 @@ public class CrosswordViewModel {
         //this.statusMessage = "";
         this.feedbackMessage = "";
         this.submissionCorrect = false;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        boolean old = this.completed;
+        this.completed = completed;
+        support.firePropertyChange("completed", old, completed);
     }
 
 

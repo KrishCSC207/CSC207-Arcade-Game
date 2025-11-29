@@ -21,13 +21,13 @@ public class CrosswordPresenter implements StartCrosswordOutputBoundary, SubmitC
     }
 
     @Override
-    public void presentResult(SubmitCrosswordOutputData outputData) {
-        if (outputData.isAllCorrect()) {
-            viewModel.setSubmissionCorrect(true);
-            viewModel.setFeedbackMessage("Congratulations! All answers are correct!");
+    public void presentResult(SubmitCrosswordOutputData data) {
+        if (data.isAllCorrect()) {
+            viewModel.setFeedbackMessage("All correct! 🎉");
+            viewModel.setCompleted(true);     // <-- triggers navigation via view listener
         } else {
-            viewModel.setSubmissionCorrect(false);
-            viewModel.setFeedbackMessage("Some answers are incorrect. Try again!");
+            viewModel.setFeedbackMessage("Some answers are incorrect — try again.");
+            viewModel.setCompleted(false);
         }
     }
 }
