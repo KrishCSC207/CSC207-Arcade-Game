@@ -33,10 +33,7 @@ public class QuizInteractor implements QuizInputBoundary {
                 currentSession.getCurrentQuestionIndex() + 1,
                 currentSession.getTotalQuestions());
 
-        QuizOutputData outputData = new QuizOutputData(
-                firstQuestion.getImagePath(),
-                progressLabel
-        );
+        QuizOutputData outputData = new QuizOutputData(firstQuestion.getImagePath(), progressLabel);
 
         // 5) Present the quiz view
         quizPresenter.prepareQuizView(outputData);

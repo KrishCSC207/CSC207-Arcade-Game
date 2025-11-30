@@ -49,7 +49,8 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(CategorySelectionView.this, "请先选择一个模块");
+                JOptionPane.showMessageDialog(
+                        CategorySelectionView.this, "Please select a module.");
             }
         });
 
