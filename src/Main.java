@@ -1,10 +1,7 @@
 import interface_adapters.crossword.*;
-import interface_adapters.crossword.data_access.LocalCrosswordPuzzleDataAccess;
-import use_case.crossword.*;
 import use_case.crossword.start.*;
 import use_case.crossword.submit.SubmitCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInteractor;
-import view.crossword.CrosswordView;
 import interface_adapters.crossword.data_access.SimpleDaoSelector;
 import java.awt.CardLayout;
 import view.crossword.DecisionPage;
@@ -49,7 +46,7 @@ public class Main {
         JPanel hardView = new hard_wordsearch(controller, viewModel);
         
         // Exit page
-        ExitPage exitPage = new ExitPage();
+        ExitPage exitPage = new ExitPage(viewModel);
 
         // Decision page: on click -> set difficulty + show the chosen card
         DecisionPage decision = new DecisionPage(

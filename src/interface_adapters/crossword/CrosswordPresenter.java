@@ -17,14 +17,15 @@ public class CrosswordPresenter implements StartCrosswordOutputBoundary, SubmitC
         viewModel.setPuzzleId(puzzleId);
         viewModel.setImagePath(imagePath);
         viewModel.setNumSolutions(numSolutions);
-        //viewModel.setStatusMessage("Crossword loaded.");
+        viewModel.setStartTime(System.currentTimeMillis());
     }
 
     @Override
     public void presentResult(SubmitCrosswordOutputData data) {
         if (data.isAllCorrect()) {
+            viewModel.setElapsedTime(data.getElapsedTime());
             viewModel.setFeedbackMessage("All correct! 🎉");
-            viewModel.setCompleted(true);     // <-- triggers navigation via view listener
+            viewModel.setCompleted(true);
         } else {
             viewModel.setFeedbackMessage("Some answers are incorrect — try again.");
             viewModel.setCompleted(false);

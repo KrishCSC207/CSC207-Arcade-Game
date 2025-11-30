@@ -1,8 +1,8 @@
+
 package interface_adapters.crossword;
 
-import java.beans.PropertyChangeListener; //  From clean CA lab
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 
 public class CrosswordViewModel {
 
@@ -12,17 +12,19 @@ public class CrosswordViewModel {
     private int numSolutions;
     private String statusMessage;
     private boolean completed;
-
     private String feedbackMessage;
     private boolean submissionCorrect;
+    private long startTime;
+    private long elapsedTime;
 
     public CrosswordViewModel() {
         this.puzzleId = "";
         this.imagePath = "";
         this.numSolutions = 0;
-        //this.statusMessage = "";
         this.feedbackMessage = "";
         this.submissionCorrect = false;
+        this.startTime = 0;
+        this.elapsedTime = 0;
     }
 
     public boolean isCompleted() {
@@ -34,7 +36,6 @@ public class CrosswordViewModel {
         this.completed = completed;
         support.firePropertyChange("completed", old, completed);
     }
-
 
     public String getPuzzleId() {
         return puzzleId;
@@ -48,10 +49,6 @@ public class CrosswordViewModel {
         return numSolutions;
     }
 
-//    public String getStatusMessage() {
-//        return statusMessage;
-//    }
-
     public String getFeedbackMessage() {
         return feedbackMessage;
     }
@@ -59,7 +56,6 @@ public class CrosswordViewModel {
     public void setFeedbackMessage(String feedbackMessage) {
         String oldMessage = this.feedbackMessage;
         this.feedbackMessage = feedbackMessage;
-        // Fire event so the View can update!
         support.firePropertyChange("feedbackMessage", oldMessage, feedbackMessage);
     }
 
@@ -93,5 +89,25 @@ public class CrosswordViewModel {
 
     public void setStatusMessage(String statusMessage) {
         this.statusMessage = statusMessage;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        long old = this.startTime;
+        this.startTime = startTime;
+        support.firePropertyChange("startTime", old, startTime);
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(long elapsedTime) {
+        long old = this.elapsedTime;
+        this.elapsedTime = elapsedTime;
+        support.firePropertyChange("elapsedTime", old, elapsedTime);
     }
 }

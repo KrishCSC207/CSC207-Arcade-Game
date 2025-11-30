@@ -38,7 +38,9 @@ public class SubmitCrosswordInteractor implements SubmitCrosswordInputBoundary {
                 }
             }
         }
-        SubmitCrosswordOutputData outputData = new SubmitCrosswordOutputData(allCorrect);
+
+        long elapsedTime = System.currentTimeMillis() - inputData.getStartTime();
+        SubmitCrosswordOutputData outputData = new SubmitCrosswordOutputData(allCorrect, elapsedTime);
         presenter.presentResult(outputData);
     }
 }

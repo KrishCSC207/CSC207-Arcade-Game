@@ -32,13 +32,13 @@ public class CrosswordController {
 
     public void startCrossword(String difficulty) {
         if (selector != null) {
-            selector.select(difficulty);   // tell the shared selector which DAO to use
+            selector.select(difficulty);
         }
-        startUseCase.startCrossword();     // run your existing start flow
+        startUseCase.startCrossword();
     }
 
-    public void submitAnswers(List<String> userAnswers){
-        SubmitCrosswordInputData inputData = new SubmitCrosswordInputData(userAnswers);
+    public void submitAnswers(List<String> userAnswers, long startTime){
+        SubmitCrosswordInputData inputData = new SubmitCrosswordInputData(userAnswers, startTime);
         submitInteractor.execute(inputData);
     }
 }

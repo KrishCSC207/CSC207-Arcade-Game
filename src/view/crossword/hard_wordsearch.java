@@ -1,14 +1,9 @@
 package view.crossword;
 
-// controller work has to be done, including any errors with the plugins and property handler, follow similar structure to what I did in Crossword view....
 import interface_adapters.crossword.CrosswordController;
 import interface_adapters.crossword.CrosswordViewModel;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,29 +15,42 @@ public class hard_wordsearch extends JPanel implements java.beans.PropertyChange
     private final List<JTextField> answerFields;
     private final JButton answerButton;
     private final JLabel feedbackLabel;
+    private final JLabel timerLabel;
+    private Timer timer;
 
     public hard_wordsearch(CrosswordController controller, CrosswordViewModel viewModel) {
         this.controller = controller;
         this.viewModel = viewModel;
         this.viewModel.addPropertyChangeListener(this);
+
         this.answerFields = new ArrayList<>();
         this.answerButton = new JButton("Submit!");
         this.feedbackLabel = new JLabel(" ");
-
+        this.timerLabel = new JLabel("Time: 00:00");
         setLayout(new BorderLayout());
 
-        // top-left Back button header (add once)
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        // top header with Back button (left) and timer (right)
+        JPanel header = new JPanel(new BorderLayout());
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         JButton backBtn = new JButton("Back");
         backBtn.addActionListener(e -> {
+            stopTimer();
             java.awt.Container c = this.getParent();
             while (c != null && !(c.getLayout() instanceof java.awt.CardLayout)) c = c.getParent();
             if (c != null) ((java.awt.CardLayout) c.getLayout()).show(c, "DECISION");
         });
-        header.add(backBtn);
-        add(header, java.awt.BorderLayout.NORTH);
+        leftPanel.add(backBtn);
 
-        // Image at the top/center
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        timerLabel.setFont(new Font("Monospaced", Font.BOLD, 16));
+        rightPanel.add(timerLabel);
+
+        header.add(leftPanel, BorderLayout.WEST);
+        header.add(rightPanel, BorderLayout.EAST);
+        add(header, BorderLayout.NORTH);
+
+        // Image at the center
         imageLabel = new JLabel("", SwingConstants.CENTER);
         add(imageLabel, BorderLayout.CENTER);
 
@@ -56,7 +64,31 @@ public class hard_wordsearch extends JPanel implements java.beans.PropertyChange
 
         // Build UI once from ViewModel
         buildUIFromViewModel();
+
+        // Start timer
+        startTimer();
     }
+
+    private void startTimer() {
+        stopTimer();
+        timer = new Timer(1000, e -> updateTimerDisplay());
+        timer.start();
+    }
+
+    private void stopTimer() {
+        if (timer != null) {
+            timer.stop();
+            timer = null;
+        }
+    }
+
+    private void updateTimerDisplay() {
+        long elapsed = System.currentTimeMillis() - viewModel.getStartTime();
+        long seconds = (elapsed / 1000) % 60;
+        long minutes = (elapsed / 1000) / 60;
+        timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+    }
+
     private void buildUIFromViewModel() {
         // refresh image
         String imagePath = viewModel.getImagePath();
@@ -82,9 +114,9 @@ public class hard_wordsearch extends JPanel implements java.beans.PropertyChange
             answerButton.removeActionListener(al);
         }
         answerButton.addActionListener(e -> {
-            java.util.List<String> userAnswers = new java.util.ArrayList<>();
+            List<String> userAnswers = new ArrayList<>();
             for (JTextField field : answerFields) userAnswers.add(field.getText());
-            controller.submitAnswers(userAnswers);
+            controller.submitAnswers(userAnswers, viewModel.getStartTime());
         });
 
         answersPanel.add(answerButton);
@@ -93,11 +125,13 @@ public class hard_wordsearch extends JPanel implements java.beans.PropertyChange
         answersPanel.revalidate();
         answersPanel.repaint();
     }
+
     @Override
     public void propertyChange(java.beans.PropertyChangeEvent evt) {
         String name = evt.getPropertyName();
 
         if ("completed".equals(name) && Boolean.TRUE.equals(evt.getNewValue())) {
+            stopTimer();
             java.awt.Container c = this.getParent();
             while (c != null && !(c.getLayout() instanceof java.awt.CardLayout)) c = c.getParent();
             if (c != null) ((java.awt.CardLayout) c.getLayout()).show(c, "EXIT");
