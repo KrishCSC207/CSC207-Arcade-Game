@@ -2,6 +2,7 @@ package use_case.signup;
 
 import entity.User;
 import entity.UserFactory;
+import use_case.password_validator.PasswordValidatorServiceDataAccessInterface; // NEW IMPORT
 
 /**
  * The Signup Interactor.
@@ -10,13 +11,16 @@ public class SignupInteractor implements SignupInputBoundary {
     private final SignupUserDataAccessInterface userDataAccessObject;
     private final SignupOutputBoundary userPresenter;
     private final UserFactory userFactory;
+    private final PasswordValidatorServiceDataAccessInterface passwordValidator; // NEW FIELD
 
     public SignupInteractor(SignupUserDataAccessInterface signupDataAccessInterface,
                             SignupOutputBoundary signupOutputBoundary,
-                            UserFactory userFactory) {
+                            UserFactory userFactory,
+                            PasswordValidatorServiceDataAccessInterface passwordValidator) { // NEW ARGUMENT
         this.userDataAccessObject = signupDataAccessInterface;
         this.userPresenter = signupOutputBoundary;
         this.userFactory = userFactory;
+        this.passwordValidator = passwordValidator; // ASSIGNMENT
     }
 
     @Override
@@ -32,6 +36,9 @@ public class SignupInteractor implements SignupInputBoundary {
         }
         else if ("".equals(signupInputData.getUsername())) {
             userPresenter.prepareFailView("Username cannot be empty");
+        }
+        else if (passwordValidator.isPasswordCompromised(signupInputData.getPassword())) {
+            userPresenter.prepareFailView("Password is too common/compromised. Please choose a stronger one.");
         }
         else {
             final User user = userFactory.create(signupInputData.getUsername(), signupInputData.getPassword());

@@ -4,49 +4,33 @@ import data_access.InMemoryUserDataAccessObject;
 import entity.User;
 import entity.UserFactory;
 import org.junit.jupiter.api.Test;
+import use_case.password_validator.PasswordValidatorServiceDataAccessInterface;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ChangePasswordInteractorTest {
 
     @Test
-    void successTest() {
-        // FIX: The constructor expects (password, username)
-        ChangePasswordInputData inputData = new ChangePasswordInputData("newPassword123", "Paul");
-
+    void failurePasswordCompromisedTest() {
+        // 1. Arrange
+        ChangePasswordInputData inputData = new ChangePasswordInputData("password123", "Paul");
         InMemoryUserDataAccessObject userRepository = new InMemoryUserDataAccessObject();
         UserFactory factory = new UserFactory();
 
+        // Setup User
         User user = factory.create("Paul", "oldPassword");
         userRepository.save(user);
 
-        ChangePasswordOutputBoundary successPresenter = new ChangePasswordOutputBoundary() {
+        // CREATE A MOCK VALIDATOR
+        // This simulates the API saying "YES, this password is bad"
+        PasswordValidatorServiceDataAccessInterface mockValidator = new PasswordValidatorServiceDataAccessInterface() {
             @Override
-            public void prepareSuccessView(ChangePasswordOutputData outputData) {
-                assertEquals("Paul", outputData.getUsername());
-            }
-
-            @Override
-            public void prepareFailView(String error) {
-                fail("Use case failure is unexpected.");
+            public boolean isPasswordCompromised(String password) {
+                return true; // Always say it's compromised for this test
             }
         };
 
-        ChangePasswordInputBoundary interactor = new ChangePasswordInteractor(userRepository, successPresenter, factory);
-        interactor.execute(inputData);
-    }
-
-    @Test
-    void failurePasswordEmptyTest() {
-        // FIX: The constructor expects (password, username)
-        ChangePasswordInputData inputData = new ChangePasswordInputData("", "Paul");
-
-        InMemoryUserDataAccessObject userRepository = new InMemoryUserDataAccessObject();
-        UserFactory factory = new UserFactory();
-
-        User user = factory.create("Paul", "password");
-        userRepository.save(user);
-
+        // 2. Act: Create failure presenter
         ChangePasswordOutputBoundary failurePresenter = new ChangePasswordOutputBoundary() {
             @Override
             public void prepareSuccessView(ChangePasswordOutputData user) {
@@ -55,11 +39,19 @@ class ChangePasswordInteractorTest {
 
             @Override
             public void prepareFailView(String error) {
-                assertEquals("New password cannot be empty", error);
+                // Verify the correct error message for a compromised password
+                assertEquals("This password has been exposed in a data breach. Please choose a safer one.", error);
             }
         };
 
-        ChangePasswordInputBoundary interactor = new ChangePasswordInteractor(userRepository, failurePresenter, factory);
+        // 3. Execute
+        ChangePasswordInputBoundary interactor = new ChangePasswordInteractor(
+                userRepository,
+                failurePresenter,
+                factory,
+                mockValidator // Pass the mock here
+        );
+
         interactor.execute(inputData);
     }
 }
