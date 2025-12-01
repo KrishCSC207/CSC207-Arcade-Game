@@ -1,64 +1,41 @@
 package app;
 
-import data_access.QuestionDAO;
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizPresenter;
-import interface_adapter.multiple_choice.QuizViewModel;
-import interface_adapter.multiple_choice.ResultsViewModel;
-import use_case.QuestionDAI;
-import use_case.quiz.QuizInteractor;
-import use_case.submit.SubmitAnswerInteractor;
-import view.CategorySelectionView;
-import view.QuizView;
-import view.ResultsView;
-
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        QuestionDAI repository = new QuestionDAO();
-        repository.loadData();
+        // Make UI fonts bigger globally
+        setGlobalUIFont(16f);
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addLoginView()
+                .addSignupView()
+                .addLoggedInView()
+                .addChangePasswordView()
+                .addConnectionsView()
+                .addSignupUseCase()
+                .addLoginUseCase()
+                .addChangePasswordUseCase()
+                .addLogoutUseCase()
+                .addConnectionsUseCase()
+                .addCrosswordUseCase()
+                .build();
 
-        QuizViewModel quizViewModel = new QuizViewModel();
-        ResultsViewModel resultsViewModel = new ResultsViewModel();
-        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
+        application.pack();
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
+    }
 
-        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
-        QuizController quizController = new QuizController(quizInteractor);
-
-        CategorySelectionView selectionView = new CategorySelectionView(quizViewModel);
-        selectionView.setQuizController(quizController);
-        QuizView quizView = new QuizView(quizController, quizViewModel);
-        ResultsView resultsView = new ResultsView(resultsViewModel);
-
-        quizViewModel.addPropertyChangeListener(evt -> {
-            if ("imagePath".equals(evt.getPropertyName())) {
-                if (!quizController.hasSubmitAnswerInteractor()
-                        && quizInteractor.getCurrentSession() != null) {
-                    SubmitAnswerInteractor submitAnswerInteractor =
-                            new SubmitAnswerInteractor(
-                                    quizInteractor.getCurrentSession(),
-                                    presenter,
-                                    presenter);
-                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
-                }
-                if (selectionView.isDisplayable()) {
-                    selectionView.dispose();
-                    quizView.setVisible(true);
-                }
+    private static void setGlobalUIFont(float size) {
+        UIDefaults defaults = UIManager.getDefaults();
+        for (Object key : defaults.keySet()) {
+            Object value = defaults.get(key);
+            if (value instanceof Font) {
+                Font f = (Font) value;
+                defaults.put(key, new FontUIResource(f.deriveFont(size)));
             }
-        });
-
-        resultsViewModel.addPropertyChangeListener(evt -> {
-            String name = evt.getPropertyName();
-            if ("accuracy".equals(name) || "totalTimeMs".equals(name)) {
-                SwingUtilities.invokeLater(() -> {
-                    quizView.dispose();
-                    resultsView.setVisible(true);
-                });
-            }
-        });
-
-        selectionView.setVisible(true);
+        }
     }
 }
