@@ -221,26 +221,45 @@ public class CrosswordView {
         ExitPanel(CrosswordViewModel viewModel) {
             this.viewModel = viewModel;
             this.viewModel.addPropertyChangeListener(this);
+            setLayout(new BorderLayout());
 
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+            JButton backBtn = new JButton("Back");
+            backBtn.addActionListener(e -> {
+                Container c = this.getParent();
+                while (c != null && !(c.getLayout() instanceof CardLayout)) {
+                    c = c.getParent();
+                }
+                if (c != null) {
+                    ((CardLayout) c.getLayout()).show(c, "DECISION");
+                }
+            });
+
+            JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            topPanel.add(backBtn);
+            add(topPanel, BorderLayout.NORTH);
+
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
             JLabel titleLabel = new JLabel("Thank you for Playing!");
             titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(titleLabel);
-
-            add(Box.createVerticalStrut(12));
 
             timeLabel = new JLabel("Your time was: 00:00");
             timeLabel.setFont(new Font("Monospaced", Font.BOLD, 18));
             timeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(timeLabel);
-
-            add(Box.createVerticalStrut(12));
 
             JLabel awesomeLabel = new JLabel("Awesome work!");
             awesomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(awesomeLabel);
+
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(titleLabel);
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(timeLabel);
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(awesomeLabel);
+
+            add(centerPanel, BorderLayout.CENTER);
+
         }
 
         @Override
