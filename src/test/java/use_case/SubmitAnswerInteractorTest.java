@@ -205,9 +205,6 @@ public class SubmitAnswerInteractorTest {
             }
         };
 
-
-
-
         // Create the interactor
         SubmitAnswerInteractor interactor = new SubmitAnswerInteractor(quizSession, mockSubmitPresenter, mockQuizPresenter);
 
