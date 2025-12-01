@@ -10,7 +10,7 @@ import java.beans.PropertyChangeSupport;
  *
  * @param <T> The type of state object contained in the model.
  */
-public class ViewModel<T> {
+public abstract class ViewModel<T> {
 
     private final String viewName;
 
@@ -60,5 +60,13 @@ public class ViewModel<T> {
      */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         this.support.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes a PropertyChangeListener from this ViewModel.
+     * @param listener The PropertyChangeListener to be removed
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        this.support.removePropertyChangeListener(listener);
     }
 }
