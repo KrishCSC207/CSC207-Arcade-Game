@@ -101,7 +101,8 @@ public class AppBuilder {
     public AppBuilder addChangePasswordView() {
         changePasswordView = new ChangePasswordView(loggedInViewModel, viewManagerModel);
         cardPanel.add(changePasswordView, changePasswordView.getViewName());
-}
+        return this;
+    }
     public AppBuilder addConnectionsView() {
         connectionsViewModel = new ConnectionsViewModel();
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
