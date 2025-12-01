@@ -25,6 +25,27 @@ public class Main {
 
         QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
         QuizController quizController = new QuizController(quizInteractor);
+        // Make UI fonts bigger globally
+        setGlobalUIFont(16f);
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addLoginView()
+                .addSignupView()
+                .addLoggedInView()
+                .addChangePasswordView()
+                .addConnectionsView()
+                .addSignupUseCase()
+                .addLoginUseCase()
+                .addChangePasswordUseCase()
+                .addLogoutUseCase()
+                .addConnectionsUseCase()
+                .addCrosswordUseCase()
+                .build();
+
+        application.pack();
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
+    }
 
         CategorySelectionView selectionView = new CategorySelectionView(quizViewModel);
         selectionView.setQuizController(quizController);

@@ -1,0 +1,113 @@
+
+package interface_adapter.crossword;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+public class CrosswordViewModel {
+
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+    private String puzzleId;
+    private String imagePath;
+    private int numSolutions;
+    private String statusMessage;
+    private boolean completed;
+    private String feedbackMessage;
+    private boolean submissionCorrect;
+    private long startTime;
+    private long elapsedTime;
+
+    public CrosswordViewModel() {
+        this.puzzleId = "";
+        this.imagePath = "";
+        this.numSolutions = 0;
+        this.feedbackMessage = "";
+        this.submissionCorrect = false;
+        this.startTime = 0;
+        this.elapsedTime = 0;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        boolean old = this.completed;
+        this.completed = completed;
+        support.firePropertyChange("completed", old, completed);
+    }
+
+    public String getPuzzleId() {
+        return puzzleId;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public int getNumSolutions() {
+        return numSolutions;
+    }
+
+    public String getFeedbackMessage() {
+        return feedbackMessage;
+    }
+
+    public void setFeedbackMessage(String feedbackMessage) {
+        String oldMessage = this.feedbackMessage;
+        this.feedbackMessage = feedbackMessage;
+        support.firePropertyChange("feedbackMessage", oldMessage, feedbackMessage);
+    }
+
+    public boolean isSubmissionCorrect() {
+        return submissionCorrect;
+    }
+
+    public void setSubmissionCorrect(boolean submissionCorrect) {
+        this.submissionCorrect = submissionCorrect;
+    }
+
+    public void setPuzzleId(String puzzleId) {
+        this.puzzleId = puzzleId;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
+    }
+
+    public void setNumSolutions(int numSolutions) {
+        this.numSolutions = numSolutions;
+    }
+
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        long old = this.startTime;
+        this.startTime = startTime;
+        support.firePropertyChange("startTime", old, startTime);
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(long elapsedTime) {
+        long old = this.elapsedTime;
+        this.elapsedTime = elapsedTime;
+        support.firePropertyChange("elapsedTime", old, elapsedTime);
+    }
+}
