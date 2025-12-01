@@ -5,6 +5,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
+import interface_adapter.crossword.CrosswordController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +25,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
+    private CrosswordController crosswordController;
 
     private final JLabel username;
 
@@ -116,6 +118,13 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             }
         });
 
+        // Crossword button action: switch to crossword card managed by ViewManager
+        crosswordBtn.addActionListener(e -> {
+            // Ensure controller exists (wired in AppBuilder); even if null, we can still show the view
+            viewManagerModel.setState("crossword");
+            viewManagerModel.firePropertyChange();
+        });
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Add some space at the very top
@@ -164,5 +173,9 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     public void setConnectionsController(ConnectionsController connectionsController) {
         this.connectionsController = connectionsController;
+    }
+
+    public void setCrosswordController(CrosswordController crosswordController) {
+        this.crosswordController = crosswordController;
     }
 }

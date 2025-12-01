@@ -1,4 +1,4 @@
-package interface_adapters.crossword;
+package interface_adapter.crossword;
 
 import use_case.crossword.start.StartCrosswordOutputBoundary;
 import use_case.crossword.submit.SubmitCrosswordOutputBoundary;
