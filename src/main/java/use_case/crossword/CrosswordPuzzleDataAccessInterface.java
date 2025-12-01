@@ -1,6 +1,6 @@
 package use_case.crossword;
 
-import entity.crossword.CrosswordPuzzle;
+import entity.CrosswordPuzzle;
 
 import java.util.ArrayList;
 

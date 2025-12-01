@@ -1,6 +1,6 @@
-package interface_adapters.crossword.data_access;
+package data_access;
 
-import entity.crossword.CrosswordPuzzle;
+import entity.CrosswordPuzzle;
 import java.util.*;
 
 public final class CrosswordData {

@@ -1,5 +1,5 @@
 
-package interface_adapters.crossword;
+package interface_adapter.crossword;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

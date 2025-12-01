@@ -1,4 +1,4 @@
-package entity.crossword;
+package entity;
 
 import java.util.List;
 

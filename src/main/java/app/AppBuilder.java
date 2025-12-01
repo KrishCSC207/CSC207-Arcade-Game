@@ -19,6 +19,15 @@ import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
 import view.ConnectionsGameView;
+import interface_adapter.crossword.CrosswordController;
+import interface_adapter.crossword.CrosswordPresenter;
+import interface_adapter.crossword.CrosswordViewModel;
+import use_case.crossword.start.StartCrosswordInputBoundary;
+import use_case.crossword.start.StartCrosswordInteractor;
+import use_case.crossword.submit.SubmitCrosswordInputBoundary;
+import use_case.crossword.submit.SubmitCrosswordInteractor;
+import data_access.SimpleDaoSelector;
+import view.CrosswordView;
 import use_case.game.GameInteractor;
 import use_case.game.GameSubmitGuessInteractor;
 import use_case.game.GameStateRepository;
@@ -72,6 +81,12 @@ public class AppBuilder {
     private ConnectionsGameView connectionsGameView;
     private GameStateRepository gameStateRepository;
     private GameDataAccessInterface gameDataAccess;
+
+    // Crossword additions
+    private CrosswordViewModel crosswordViewModel;
+    private CrosswordPresenter crosswordPresenter;
+    private CrosswordController crosswordController;
+    private JPanel crosswordRoot;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -166,7 +181,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addConnectionsUseCases() {
+    public AppBuilder addConnectionsUseCase() {
         // Set up repository and DAO
         gameStateRepository = new InMemoryGameStateRepository();
         gameDataAccess = new ApiGameDataAccess();
@@ -187,6 +202,55 @@ public class AppBuilder {
         if (loggedInView != null) {
             loggedInView.setConnectionsController(connectionsController);
         }
+        return this;
+    }
+
+    public AppBuilder addCrosswordUseCase() {
+        // ViewModel and Presenter
+        crosswordViewModel = new CrosswordViewModel();
+        crosswordPresenter = new CrosswordPresenter(crosswordViewModel);
+
+        // DAO selector shared by both use cases
+        final SimpleDaoSelector selector = new SimpleDaoSelector();
+
+        // Interactors
+        final StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(selector, crosswordPresenter);
+        final SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(selector, crosswordPresenter);
+
+        // Controller
+        crosswordController = new CrosswordController(startInteractor, submitInteractor, selector);
+
+        // Build a local CardLayout root for the crossword flow
+        crosswordRoot = new JPanel(new CardLayout());
+
+        // Create panels via factory and register with local card layout
+        JPanel decision = CrosswordView.createDecisionPanel(
+                crosswordController,
+                crosswordViewModel,
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "EASY"),
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
+        );
+        JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
+        JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
+        JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
+        JPanel exit   = CrosswordView.createExitPanel(crosswordViewModel);
+
+        crosswordRoot.add(decision, "DECISION");
+        crosswordRoot.add(easy, "EASY");
+        crosswordRoot.add(medium, "MEDIUM");
+        crosswordRoot.add(hard, "HARD");
+        crosswordRoot.add(exit, "EXIT");
+        ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "DECISION");
+
+        // Add crossword as a single card to the app's ViewManager
+        cardPanel.add(crosswordRoot, "crossword");
+
+        // Wire entrance from LoggedInView
+        if (loggedInView != null) {
+            loggedInView.setCrosswordController(crosswordController);
+        }
+
         return this;
     }
 

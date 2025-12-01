@@ -1,10 +1,10 @@
-package interface_adapters.crossword;
+package interface_adapter.crossword;
 
 import use_case.crossword.start.StartCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInputData;
 import java.util.List;
-import interface_adapters.crossword.data_access.SimpleDaoSelector;
+import data_access.SimpleDaoSelector;
 
 public class CrosswordController {
 

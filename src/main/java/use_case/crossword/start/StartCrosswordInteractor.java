@@ -1,6 +1,6 @@
 package use_case.crossword.start;
 
-import entity.crossword.CrosswordPuzzle;
+import entity.CrosswordPuzzle;
 import use_case.crossword.CrosswordPuzzleDataAccessInterface;
 
 public class StartCrosswordInteractor implements StartCrosswordInputBoundary {
