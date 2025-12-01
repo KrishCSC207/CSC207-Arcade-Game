@@ -30,6 +30,7 @@ public class QuizInteractor implements QuizInputBoundary {
 
     @Override
     public void execute(QuizInputData inputData) {
+        questionDAO.loadData();
         // 1) Get user-chosen category
         String category = inputData.getCategory();
 

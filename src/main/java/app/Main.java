@@ -17,7 +17,6 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         QuestionDAI repository = new QuestionDAO();
-        repository.loadData();
 
         QuizViewModel quizViewModel = new QuizViewModel();
         ResultsViewModel resultsViewModel = new ResultsViewModel();
