@@ -6,13 +6,25 @@ import com.csc207.arcade.multiplechoice.use_case.QuestionDAI;
 
 import java.util.List;
 
+/**
+ * The QuizInteractor class initializes a new quiz session.
+ * It retrieves questions based on the user's selected category.
+ */
 public class QuizInteractor implements QuizInputBoundary {
+    /** Data Access object for stored questions. */
     private final QuestionDAI questionDAO;
+    /** Presenter for preparing the quiz view. */
     private final QuizOutputBoundary quizPresenter;
+    /** Current quiz session. */
     private QuizSession currentSession;
-
-    public QuizInteractor(QuestionDAI questionDAO, QuizOutputBoundary quizPresenter) {
-        this.questionDAO = questionDAO;
+    /**
+     * Constructs a QuizInteractor with the specified Question DAI and Output Boundary.
+     *
+     * @param questionDao   Data Access Interface for retrieving questions
+     * @param quizPresenter Output Boundary for preparing the quiz view
+     */
+    public QuizInteractor(final QuestionDAI questionDao, final QuizOutputBoundary quizPresenter) {
+        this.questionDAO = questionDao;
         this.quizPresenter = quizPresenter;
     }
 
