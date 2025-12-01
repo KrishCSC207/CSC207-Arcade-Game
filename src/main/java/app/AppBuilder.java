@@ -14,6 +14,18 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.connections.ConnectionsViewModel;
+import interface_adapter.connections.ConnectionsPresenter;
+import interface_adapter.connections.ConnectionsController;
+import view.ConnectionsGameView;
+import use_case.game.GameInteractor;
+import use_case.game.GameSubmitGuessInteractor;
+import use_case.game.GameStateRepository;
+import use_case.game.GameOutputBoundary;
+import use_case.game.GameSubmitGuessOutputBoundary;
+import use_case.game.GameDataAccessInterface;
+import data_access.ApiGameDataAccess;
+import data_access.InMemoryGameStateRepository;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -56,6 +68,13 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    // Connections game additions
+    private ConnectionsViewModel connectionsViewModel;
+    private ConnectionsPresenter connectionsPresenter;
+    private ConnectionsController connectionsController;
+    private ConnectionsGameView connectionsGameView;
+    private GameStateRepository gameStateRepository;
+    private GameDataAccessInterface gameDataAccess;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -79,6 +98,14 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addConnectionsView() {
+        connectionsViewModel = new ConnectionsViewModel();
+        connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
+        connectionsGameView = new ConnectionsGameView(connectionsViewModel, null); // controller set later
+        cardPanel.add(connectionsGameView, connectionsViewModel.getViewName());
         return this;
     }
 
@@ -129,6 +156,30 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
+        return this;
+    }
+
+    public AppBuilder addConnectionsUseCases() {
+        // Set up repository and DAO
+        gameStateRepository = new InMemoryGameStateRepository();
+        gameDataAccess = new ApiGameDataAccess();
+
+        // Interactors
+        GameOutputBoundary loadPresenter = connectionsPresenter;
+        GameSubmitGuessOutputBoundary submitPresenter = connectionsPresenter;
+        GameInteractor loadInteractor = new GameInteractor(gameDataAccess, gameStateRepository, loadPresenter);
+        GameSubmitGuessInteractor submitInteractor = new GameSubmitGuessInteractor(gameStateRepository, submitPresenter);
+
+        // Controller
+        connectionsController = new ConnectionsController(loadInteractor, submitInteractor);
+
+        // Wire controller into views
+        if (connectionsGameView != null) {
+            connectionsGameView.setController(connectionsController);
+        }
+        if (loggedInView != null) {
+            loggedInView.setConnectionsController(connectionsController);
+        }
         return this;
     }
 

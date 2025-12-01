@@ -31,7 +31,7 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
 
     // The ViewModel and Controller
     private final ConnectionsViewModel viewModel;
-    private final ConnectionsController controller;
+    private ConnectionsController controller;
 
     // --- UI Components ---
     private final JPanel gridPanel;
@@ -86,6 +86,10 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
         // 3. Add Event Listeners
         submitButton.addActionListener(e -> handleSubmit());
         deselectButton.addActionListener(e -> deselectAll());
+    }
+
+    public void setController(ConnectionsController controller) {
+        this.controller = controller;
     }
 
     /**
@@ -196,7 +200,8 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
         for (String word : allWords) {
             String buttonText = "<html><center>" + word.replace("\n", "<br>") + "</center></html>";
             JButton button = new JButton(buttonText);
-            button.setFont(new Font("Arial", Font.BOLD, 12));
+            // Respect globally configured UI font size; just make it bold
+            button.setFont(button.getFont().deriveFont(Font.BOLD));
             button.setOpaque(true);
             button.setBorder(new LineBorder(Color.BLACK));
             button.setActionCommand(word); // Store raw word
