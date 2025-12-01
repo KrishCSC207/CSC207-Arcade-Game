@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.PwnedPasswordDataAccessObject;
+import data_access.PwnedPasswordDataAccessObject; // NEW IMPORT
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.change_password.ChangePasswordController;
@@ -18,17 +18,7 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
-import use_case.quiz.QuizInputData;
 import view.ConnectionsGameView;
-import interface_adapter.crossword.CrosswordController;
-import interface_adapter.crossword.CrosswordPresenter;
-import interface_adapter.crossword.CrosswordViewModel;
-import use_case.crossword.start.StartCrosswordInputBoundary;
-import use_case.crossword.start.StartCrosswordInteractor;
-import use_case.crossword.submit.SubmitCrosswordInputBoundary;
-import use_case.crossword.submit.SubmitCrosswordInteractor;
-import data_access.SimpleDaoSelector;
-import view.CrosswordView;
 import use_case.game.GameInteractor;
 import use_case.game.GameSubmitGuessInteractor;
 import use_case.game.GameStateRepository;
@@ -54,19 +44,6 @@ import view.*;
 
 import javax.swing.*;
 import java.awt.*;
-
-// NEW imports for Quiz wiring
-import data_access.QuestionDAO;
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizPresenter;
-import interface_adapter.multiple_choice.QuizViewModel;
-import interface_adapter.multiple_choice.ResultsViewModel;
-import use_case.QuestionDAI;
-import use_case.quiz.QuizInteractor;
-import use_case.submit.SubmitAnswerInteractor;
-import use_case.quiz.QuizInputBoundary;
-import use_case.quiz.QuizInputData;
-import view.QuizView;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -95,15 +72,6 @@ public class AppBuilder {
     private ConnectionsGameView connectionsGameView;
     private GameStateRepository gameStateRepository;
     private GameDataAccessInterface gameDataAccess;
-
-    // Crossword additions
-    private CrosswordViewModel crosswordViewModel;
-    private CrosswordPresenter crosswordPresenter;
-    private CrosswordController crosswordController;
-    private JPanel crosswordRoot;
-
-    // NEW field to hold the quiz window
-    private QuizView quizPanel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -198,7 +166,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addConnectionsUseCase() {
+    public AppBuilder addConnectionsUseCases() {
         // Set up repository and DAO
         gameStateRepository = new InMemoryGameStateRepository();
         gameDataAccess = new ApiGameDataAccess();
@@ -222,126 +190,17 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addCrosswordUseCase() {
-        // ViewModel and Presenter
-        crosswordViewModel = new CrosswordViewModel();
-        crosswordPresenter = new CrosswordPresenter(crosswordViewModel);
-
-        // DAO selector shared by both use cases
-        final SimpleDaoSelector selector = new SimpleDaoSelector();
-
-        // Interactors
-        final StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(selector, crosswordPresenter);
-        final SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(selector, crosswordPresenter);
-
-        // Controller
-        crosswordController = new CrosswordController(startInteractor, submitInteractor, selector);
-
-        // Build a local CardLayout root for the crossword flow
-        crosswordRoot = new JPanel(new CardLayout());
-
-        // Create panels via factory and register with local card layout
-
-        JPanel decision = CrosswordView.createDecisionPanel(
-                viewManagerModel,
-                crosswordController,
-                crosswordViewModel,
-                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "EASY"),
-                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
-                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
-        );
-        JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
-        JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
-        JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
-        JPanel exit   = CrosswordView.createExitPanel(crosswordViewModel);
-
-        crosswordRoot.add(decision, "DECISION");
-        crosswordRoot.add(easy, "EASY");
-        crosswordRoot.add(medium, "MEDIUM");
-        crosswordRoot.add(hard, "HARD");
-        crosswordRoot.add(exit, "EXIT");
-        ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "DECISION");
-
-        // Add crossword as a single card to the app's ViewManager
-        cardPanel.add(crosswordRoot, "crossword");
-
-        // Wire entrance from LoggedInView
-        if (loggedInView != null) {
-            loggedInView.setCrosswordController(crosswordController);
-        }
-
-        return this;
-    }
-
-    // NEW: quiz use case moved into the builder so the LoggedInView button gets wired
-    public AppBuilder addQuizUseCase() {
-        // Repository for questions
-        QuestionDAI repository = new QuestionDAO();
-
-        // View models and presenter
-        QuizViewModel quizViewModel = new QuizViewModel();
-        ResultsViewModel resultsViewModel = new ResultsViewModel();
-        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
-
-        // Interactor and controller
-        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
-        QuizController quizController = new QuizController(quizInteractor);
-
-        // Combined QuizView (embedded JPanel)
-        this.quizPanel = new QuizView(quizViewModel, resultsViewModel);
-        quizPanel.setQuizController(quizController);
-
-        // Add quizPanel to the app's central cardPanel under "multipleChoice"
-        cardPanel.add(quizPanel, "multipleChoice");
-
-        // Lazy-install SubmitAnswerInteractor when the quiz session becomes available
-        quizViewModel.addPropertyChangeListener(evt -> {
-            if ("imagePath".equals(evt.getPropertyName())) {
-                if (!quizController.hasSubmitAnswerInteractor()
-                        && quizInteractor.getCurrentSession() != null) {
-                    SubmitAnswerInteractor submitAnswerInteractor =
-                            new SubmitAnswerInteractor(
-                                    quizInteractor.getCurrentSession(),
-                                    presenter,
-                                    presenter);
-                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
-                }
-                // do NOT auto-show the quiz window here — the opener controls it
-            }
-        });
-
-        // Wire the quiz "opener" into the LoggedInView so its button will open the category selector.
-        if (loggedInView != null) {
-            final QuizInputBoundary openSelection = new QuizInputBoundary() {
-                @Override
-                public void execute(QuizInputData inputData) {
-                    // ensure the app shows the quiz card, then open selection dialog in the embedded panel
-                    viewManagerModel.setState("multipleChoice");
-                    viewManagerModel.firePropertyChange();
-                    // open selection dialog on the panel
-                    quizPanel.showWithSelection();
-                }
-            };
-            loggedInView.setMultipleChoiceController(openSelection);
-        }
-
-        return this;
-    }
-
     public JFrame build() {
         final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
 
-        // DO NOT show quiz at startup; remove previous selectionView startup behavior
-
-        // Safely set initial card-state if signupView was created, otherwise skip
-        if (signupView != null) {
-            viewManagerModel.setState(signupView.getViewName());
-            viewManagerModel.firePropertyChange();
-        }
+        viewManagerModel.setState(signupView.getViewName());
+        viewManagerModel.firePropertyChange();
 
         return application;
     }
+
+
 }
