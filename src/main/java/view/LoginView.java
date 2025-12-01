@@ -31,6 +31,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
     private final JButton logIn;
     private final JButton SignUp;
+    private final JButton cancel; // NEW BUTTON
     private LoginController loginController = null;
 
     public LoginView(LoginViewModel loginViewModel, ViewManagerModel viewManagerModel) {
@@ -53,6 +54,10 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         SignUp = new JButton("Back to Sign Up");
         buttons.add(SignUp);
 
+        // NEW: Initialize and add Cancel button
+        cancel = new JButton("Cancel");
+        buttons.add(cancel);
+
         logIn.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
@@ -71,6 +76,18 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         SignUp.addActionListener(e -> {
             viewManagerModel.setState("sign up"); // switch to signup view
             viewManagerModel.firePropertyChange();
+        });
+
+        // NEW: Cancel button logic
+        cancel.addActionListener(e -> {
+            usernameInputField.setText("");
+            passwordInputField.setText("");
+
+            // Also update the state so it is clean
+            LoginState currentState = loginViewModel.getState();
+            currentState.setUsername("");
+            currentState.setPassword("");
+            loginViewModel.setState(currentState);
         });
 
 
