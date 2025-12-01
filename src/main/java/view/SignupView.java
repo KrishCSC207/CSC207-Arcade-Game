@@ -76,7 +76,24 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 }
         );
 
-        cancel.addActionListener(this);
+        cancel.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        // Clear all input fields
+                        usernameInputField.setText("");
+                        passwordInputField.setText("");
+                        repeatPasswordInputField.setText("");
+
+                        // Also reset the state in the ViewModel
+                        final SignupState currentState = signupViewModel.getState();
+                        currentState.setUsername("");
+                        currentState.setPassword("");
+                        currentState.setRepeatPassword("");
+                        signupViewModel.setState(currentState);
+                    }
+                }
+
+        );
 
         addUsernameListener();
         addPasswordListener();

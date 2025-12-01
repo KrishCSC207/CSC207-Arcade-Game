@@ -1,10 +1,11 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.PwnedPasswordDataAccessObject; // NEW IMPORT
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.logged_in.ChangePasswordController;
-import interface_adapter.logged_in.ChangePasswordPresenter;
+import interface_adapter.change_password.ChangePasswordController;
+import interface_adapter.change_password.ChangePasswordPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
@@ -38,10 +39,8 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.LoggedInView;
-import view.LoginView;
-import view.SignupView;
-import view.ViewManager;
+import use_case.password_validator.PasswordValidatorServiceDataAccessInterface; // NEW IMPORT
+import view.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,14 +52,11 @@ public class AppBuilder {
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    // set which data access implementation to use, can be any
-    // of the classes from the data_access package
-
-    // DAO version using local file storage
+    // DAO for user data
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
 
-    // DAO version using a shared external database
-    // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+    // NEW: DAO for password validation
+    final PasswordValidatorServiceDataAccessInterface passwordValidator = new PwnedPasswordDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -68,6 +64,7 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private ChangePasswordView changePasswordView;
     // Connections game additions
     private ConnectionsViewModel connectionsViewModel;
     private ConnectionsPresenter connectionsPresenter;
@@ -89,18 +86,22 @@ public class AppBuilder {
 
     public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
-        loginView = new LoginView(loginViewModel);
+        loginView = new LoginView(loginViewModel, viewManagerModel);
         cardPanel.add(loginView, loginView.getViewName());
         return this;
     }
 
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
         return this;
     }
 
+    public AppBuilder addChangePasswordView() {
+        changePasswordView = new ChangePasswordView(loggedInViewModel, viewManagerModel);
+        cardPanel.add(changePasswordView, changePasswordView.getViewName());
+}
     public AppBuilder addConnectionsView() {
         connectionsViewModel = new ConnectionsViewModel();
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
@@ -112,8 +113,13 @@ public class AppBuilder {
     public AppBuilder addSignupUseCase() {
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
+
+        // UPDATED: Added passwordValidator to constructor
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
+                userDataAccessObject,
+                signupOutputBoundary,
+                userFactory,
+                passwordValidator);
 
         SignupController controller = new SignupController(userSignupInteractor);
         signupView.setSignupController(controller);
@@ -135,18 +141,18 @@ public class AppBuilder {
         final ChangePasswordOutputBoundary changePasswordOutputBoundary = new ChangePasswordPresenter(viewManagerModel,
                 loggedInViewModel);
 
-        final ChangePasswordInputBoundary changePasswordInteractor =
-                new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, userFactory);
+        // UPDATED: Added passwordValidator to constructor
+        final ChangePasswordInputBoundary changePasswordInteractor = new ChangePasswordInteractor(
+                userDataAccessObject,
+                changePasswordOutputBoundary,
+                userFactory,
+                passwordValidator);
 
         ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
-        loggedInView.setChangePasswordController(changePasswordController);
+        changePasswordView.setChangePasswordController(changePasswordController);
         return this;
     }
 
-    /**
-     * Adds the Logout Use Case to the application.
-     * @return this builder
-     */
     public AppBuilder addLogoutUseCase() {
         final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
                 loggedInViewModel, loginViewModel);
@@ -194,6 +200,4 @@ public class AppBuilder {
 
         return application;
     }
-
-
 }

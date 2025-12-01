@@ -13,6 +13,7 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addChangePasswordView()
                 .addConnectionsView()
                 .addSignupUseCase()
                 .addLoginUseCase()

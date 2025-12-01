@@ -1,14 +1,12 @@
 package view;
 
-import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,52 +20,82 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private final String viewName = "logged in";
     private final LoggedInViewModel loggedInViewModel;
-    private ChangePasswordController changePasswordController = null;
+    private final ViewManagerModel viewManagerModel;
+
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
 
     private final JLabel username;
-    private final JButton logOut;
+
+    // UPDATED: Changed default time to "00:00"
+    private String bestCrosswordTime = "00:00";
+    private String highestScore = "0";
+
+    private final JLabel bestTimeLabel;
+    private final JLabel highScoreLabel;
 
     private final JButton multipleChoiceBtn;
     private final JButton crosswordBtn;
     private final JButton connectionsBtn;
 
+    private final JButton logOut;
     private final JButton changePassword;
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel) {
+    public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
+
         this.loggedInViewModel = loggedInViewModel;
+        this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
-        final JLabel usernameInfo = new JLabel("Currently logged in as: ");
-        usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        username = new JLabel();
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+        // --- 1. Title Section (Hello, User) ---
+        username = new JLabel("Hello, ");
+        username.setFont(new Font("Arial", Font.BOLD, 15));
         username.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final JPanel menuButtons = new JPanel();
+        // --- 2. Stats Section ---
+        bestTimeLabel = new JLabel("Best Crossword Time: " + bestCrosswordTime);
+        bestTimeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        highScoreLabel = new JLabel("Highest Multiple Choice Score: " + highestScore);
+        highScoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // --- 3. Minigames Menu Section ---
+        JPanel menuButtons = new JPanel();
         menuButtons.setLayout(new BoxLayout(menuButtons, BoxLayout.Y_AXIS));
         menuButtons.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Buttons
         multipleChoiceBtn = new JButton("Multiple Choice");
-        menuButtons.add(multipleChoiceBtn);
+        multipleChoiceBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         crosswordBtn = new JButton("Crossword");
-        menuButtons.add(crosswordBtn);
+        crosswordBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         connectionsBtn = new JButton("Connections");
+        connectionsBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Add components to menu panel
+        menuButtons.add(multipleChoiceBtn);
+        menuButtons.add(crosswordBtn);
         menuButtons.add(connectionsBtn);
 
-        // add action listener to each button
-
-        final JPanel buttons = new JPanel();
+        // --- 4. Bottom Buttons ---
+        JPanel bottomButtons = new JPanel();
         logOut = new JButton("Log Out");
-        buttons.add(logOut);
-
         changePassword = new JButton("Change Password");
-        buttons.add(changePassword);
+        bottomButtons.add(logOut);
+        bottomButtons.add(changePassword);
 
+        // Actions
         logOut.addActionListener(this);
+        changePassword.addActionListener(e -> {
+            viewManagerModel.setState("change password");
+            viewManagerModel.firePropertyChange();
+        });
 
+        // --- Assemble the Main View with Spacing ---
         // Connections button action: load a game by prompting for a code
         connectionsBtn.addActionListener(new ActionListener() {
             @Override
@@ -90,50 +118,44 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Change this so when clicked it goes to new view
-        changePassword.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(changePassword)) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-
-                        this.changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
-                    }
-                }
-        );
-
-        this.add(usernameInfo);
+        // Add some space at the very top
         this.add(username);
+
+        // Space between "Hello" and Stats
+        this.add(Box.createVerticalStrut(15));
+        this.add(bestTimeLabel);
+        this.add(highScoreLabel);
+
+        // Space between Stats and Minigames
+        this.add(Box.createVerticalStrut(15));
         this.add(menuButtons);
-        this.add(buttons);
+
+        // Push bottom buttons to the bottom
+        this.add(bottomButtons);
     }
 
     /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
+     * React to a button click.
      */
+    @Override
     public void actionPerformed(ActionEvent evt) {
-        this.logoutController.execute();
+        if (logoutController != null) {
+            logoutController.execute();
+        }
         System.out.println("Click " + evt.getActionCommand());
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
-            final LoggedInState state = (LoggedInState) evt.getNewValue();
-            username.setText(state.getUsername());
+            LoggedInState state = (LoggedInState) evt.getNewValue();
+            // UPDATED: Concatenate "Hello, " with the username
+            username.setText("Hello, " + state.getUsername());
         }
     }
 
     public String getViewName() {
         return viewName;
-    }
-
-    public void setChangePasswordController(ChangePasswordController changePasswordController) {
-        this.changePasswordController = changePasswordController;
     }
 
     public void setLogoutController(LogoutController logoutController) {

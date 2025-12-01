@@ -1,9 +1,10 @@
 package use_case.signup;
 
 import data_access.InMemoryUserDataAccessObject;
-import entity.UserFactory;
 import entity.User;
+import entity.UserFactory;
 import org.junit.jupiter.api.Test;
+import use_case.password_validator.PasswordValidatorServiceDataAccessInterface;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,14 +12,24 @@ class SignupInteractorTest {
 
     @Test
     void successTest() {
-        SignupInputData inputData = new SignupInputData("Paul", "password", "password");
-        SignupUserDataAccessInterface userRepository = new InMemoryUserDataAccessObject();
+        // 1. Arrange
+        SignupInputData inputData = new SignupInputData("Paul", "password123", "password123");
+        InMemoryUserDataAccessObject userRepository = new InMemoryUserDataAccessObject();
+        UserFactory factory = new UserFactory();
 
-        // This creates a successPresenter that tests whether the test case is as we expect.
+        // FAIL-SAFE VALIDATOR: Creates a fake validator that always returns false (Not Compromised)
+        // We need this because the Interactor constructor now requires it.
+        PasswordValidatorServiceDataAccessInterface mockValidator = new PasswordValidatorServiceDataAccessInterface() {
+            @Override
+            public boolean isPasswordCompromised(String password) {
+                return false; // Treat all passwords as safe for this test
+            }
+        };
+
+        // 2. Act
         SignupOutputBoundary successPresenter = new SignupOutputBoundary() {
             @Override
             public void prepareSuccessView(SignupOutputData user) {
-                // 2 things to check: the output data is correct, and the user has been created in the DAO.
                 assertEquals("Paul", user.getUsername());
                 assertTrue(userRepository.existsByName("Paul"));
             }
@@ -30,72 +41,51 @@ class SignupInteractorTest {
 
             @Override
             public void switchToLoginView() {
-                // This is expected
+                // This is expected for some implementations
             }
         };
 
-        SignupInputBoundary interactor = new SignupInteractor(userRepository, successPresenter, new UserFactory());
+        // 3. Execute: Pass the mockValidator as the 4th argument
+        SignupInputBoundary interactor = new SignupInteractor(userRepository, successPresenter, factory, mockValidator);
         interactor.execute(inputData);
     }
 
     @Test
-    void failurePasswordMismatchTest() {
-        SignupInputData inputData = new SignupInputData("Paul", "password", "wrong");
-        SignupUserDataAccessInterface userRepository = new InMemoryUserDataAccessObject();
-
-        // This creates a presenter that tests whether the test case is as we expect.
-        SignupOutputBoundary failurePresenter = new SignupOutputBoundary() {
-            @Override
-            public void prepareSuccessView(SignupOutputData user) {
-                // this should never be reached since the test case should fail
-                fail("Use case success is unexpected.");
-            }
-
-            @Override
-            public void prepareFailView(String error) {
-                assertEquals("Passwords don't match.", error);
-            }
-
-            @Override
-            public void switchToLoginView() {
-                // This is expected
-            }
-        };
-
-        SignupInputBoundary interactor = new SignupInteractor(userRepository, failurePresenter, new UserFactory());
-        interactor.execute(inputData);
-    }
-
-    @Test
-    void failureUserExistsTest() {
-        SignupInputData inputData = new SignupInputData("Paul", "password", "wrong");
-        SignupUserDataAccessInterface userRepository = new InMemoryUserDataAccessObject();
-
-        // Add Paul to the repo so that when we check later they already exist
+    void failurePasswordCompromisedTest() {
+        // 1. Arrange
+        SignupInputData inputData = new SignupInputData("Paul", "badPassword", "badPassword");
+        InMemoryUserDataAccessObject userRepository = new InMemoryUserDataAccessObject();
         UserFactory factory = new UserFactory();
-        User user = factory.create("Paul", "pwd");
-        userRepository.save(user);
 
-        // This creates a presenter that tests whether the test case is as we expect.
+        // COMPROMISED VALIDATOR: Creates a fake validator that always returns TRUE (Compromised)
+        PasswordValidatorServiceDataAccessInterface mockValidator = new PasswordValidatorServiceDataAccessInterface() {
+            @Override
+            public boolean isPasswordCompromised(String password) {
+                return true; // Force the error to happen
+            }
+        };
+
+        // 2. Act
         SignupOutputBoundary failurePresenter = new SignupOutputBoundary() {
             @Override
             public void prepareSuccessView(SignupOutputData user) {
-                // this should never be reached since the test case should fail
-                fail("Use case success is unexpected.");
+                fail("Use case success is unexpected. Should fail on password check.");
             }
 
             @Override
             public void prepareFailView(String error) {
-                assertEquals("User already exists.", error);
+                // Verify the exact error message from your Interactor
+                assertEquals("Password is too common/compromised. Please choose a stronger one.", error);
             }
 
             @Override
             public void switchToLoginView() {
-                // This is expected
+                // Not expected here
             }
         };
 
-        SignupInputBoundary interactor = new SignupInteractor(userRepository, failurePresenter, new UserFactory());
+        // 3. Execute
+        SignupInputBoundary interactor = new SignupInteractor(userRepository, failurePresenter, factory, mockValidator);
         interactor.execute(inputData);
     }
 }

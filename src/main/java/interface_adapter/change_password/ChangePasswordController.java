@@ -1,4 +1,4 @@
-package interface_adapter.logged_in;
+package interface_adapter.change_password;
 
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInputData;
