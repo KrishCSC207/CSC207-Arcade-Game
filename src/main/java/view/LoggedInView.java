@@ -4,6 +4,7 @@ import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.connections.ConnectionsController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private final ViewManagerModel viewManagerModel;
 
     private LogoutController logoutController;
+    private ConnectionsController connectionsController;
 
     private final JLabel username;
 
@@ -94,6 +96,27 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         });
 
         // --- Assemble the Main View with Spacing ---
+        // Connections button action: load a game by prompting for a code
+        connectionsBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (connectionsController != null) {
+                    String code = JOptionPane.showInputDialog(
+                            LoggedInView.this,
+                            "Enter Connections game code:",
+                            "XBZQ"
+                    );
+                    if (code != null && !code.trim().isEmpty()) {
+                        connectionsController.executeLoad(code.trim());
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(LoggedInView.this,
+                            "Connections is not available right now.");
+                }
+            }
+        });
+
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Add some space at the very top
         this.add(username);
@@ -137,5 +160,9 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setConnectionsController(ConnectionsController connectionsController) {
+        this.connectionsController = connectionsController;
     }
 }
