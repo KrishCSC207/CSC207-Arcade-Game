@@ -100,5 +100,23 @@
     "category": "Module 4",
     "imagePath": "data/images/id9_M_4_Ans_D.png",
     "correctAnswer": "D"
+  },
+    {
+    "questionId": "id18",
+    "category": "Module 5",
+    "imagePath": "data/images/id18_M_5_Ans_C.png",
+    "correctAnswer": "C"
+  },
+    {
+    "questionId": "id19",
+    "category": "Module 5",
+    "imagePath": "data/images/id19_M_5_Ans_B.png",
+    "correctAnswer": "B"
+  },
+    {
+    "questionId": "id20",
+    "category": "Module 5",
+    "imagePath": "data/images/id20_M_5_Ans_C.png",
+    "correctAnswer": "C"
   }
 ]
