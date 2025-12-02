@@ -4,6 +4,7 @@ package view;
 import interface_adapter.connections.ConnectionsController;
 import interface_adapter.connections.ConnectionsState;
 import interface_adapter.connections.ConnectionsViewModel;
+import interface_adapter.ViewManagerModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -32,6 +33,7 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
     // The ViewModel and Controller
     private final ConnectionsViewModel viewModel;
     private ConnectionsController controller;
+    private ViewManagerModel viewManagerModel;
 
     // --- UI Components ---
     private final JPanel gridPanel;
@@ -64,10 +66,30 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
         // 1. Setup Main Panel (this)
         this.setLayout(new BorderLayout());
 
+        //Heaer Pannel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> {
+            if (viewManagerModel != null) {
+                // Reset game state for next play
+                resetGameState();
+                viewManagerModel.setState("logged in");
+                viewManagerModel.firePropertyChange();
+            }
+        });
+        leftPanel.add(backButton);
+        headerPanel.add(leftPanel, BorderLayout.WEST);
+
         // 2. Setup UI Components
         solvedPanel = new JPanel();
         solvedPanel.setLayout(new BoxLayout(solvedPanel, BoxLayout.Y_AXIS));
-        this.add(solvedPanel, BorderLayout.NORTH);
+        // Create a top panel that holds both header and solved panel
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(headerPanel);
+        topPanel.add(solvedPanel);
+        this.add(topPanel, BorderLayout.NORTH);
 
         gridPanel = new JPanel(new GridLayout(4, 4, 10, 10));
         gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -86,6 +108,10 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
         // 3. Add Event Listeners
         submitButton.addActionListener(e -> handleSubmit());
         deselectButton.addActionListener(e -> deselectAll());
+    }
+
+    public void setViewManagerModel(ViewManagerModel viewManagerModel) {
+        this.viewManagerModel = viewManagerModel;
     }
 
     public void setController(ConnectionsController controller) {
@@ -122,6 +148,30 @@ public class ConnectionsGameView extends JPanel implements PropertyChangeListene
             button.setBackground(defaultButtonColor);
         }
         selectedButtons.clear();
+    }
+
+    /**
+     * Resets the game state to allow for a new game to be played.
+     */
+    private void resetGameState() {
+        // Clear UI state
+        deselectAll();  // This clears selectedButtons
+        wordButtonMap.clear();
+        solvedPanel.removeAll();
+        gridPanel.removeAll();
+
+        // Reset button states
+        submitButton.setEnabled(true);
+        deselectButton.setEnabled(true);
+        mistakesLabel.setText("Mistakes remaining: 4");
+
+        // Reset ViewModel state - ConnectionsState() initializes with proper defaults:
+        // mistakesRemaining=4, empty lists, isWin/isGameOver=false
+        viewModel.setState(new ConnectionsState());
+
+        // Repaint
+        this.revalidate();
+        this.repaint();
     }
 
     /**
