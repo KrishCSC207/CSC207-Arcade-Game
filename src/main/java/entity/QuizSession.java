@@ -46,12 +46,10 @@ public class QuizSession {
      * @param isCorrect true if the answer was correct
      */
     public void recordAnswer(boolean isCorrect) {
-        // Only record the answer if this is the first attempt at the current question
         if (!currentQuestionAnsweredIncorrectly) {
             if (isCorrect) {
                 correctAnswersCount++;
             } else {
-                // Mark that this question was answered incorrectly on first attempt
                 currentQuestionAnsweredIncorrectly = true;
             }
         }
@@ -64,7 +62,7 @@ public class QuizSession {
      */
     public boolean advanceToNextQuestion() {
         currentQuestionIndex++;
-        currentQuestionAnsweredIncorrectly = false; // Reset for the new question
+        currentQuestionAnsweredIncorrectly = false;
         return currentQuestionIndex < questions.size();
     }
 

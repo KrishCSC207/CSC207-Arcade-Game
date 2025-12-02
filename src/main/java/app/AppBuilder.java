@@ -18,6 +18,7 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
+import use_case.multiple_choice.QuestionDAI;
 import view.ConnectionsGameView;
 import interface_adapter.crossword.CrosswordController;
 import interface_adapter.crossword.CrosswordPresenter;
@@ -30,10 +31,9 @@ import use_case.crossword.start.StartCrosswordInputBoundary;
 import use_case.crossword.start.StartCrosswordInteractor;
 import use_case.crossword.submit.SubmitCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInteractor;
-import use_case.multiplechoice.QuestionDataAccessInterface;
 import use_case.multiplechoice.quiz.QuizInteractor;
 import use_case.multiplechoice.submit.SubmitAnswerInteractor;
-import data_access.multiplechoice.QuestionDAO;
+import data_access.QuestionDAO;
 import data_access.SimpleDaoSelector;
 import view.CrosswordView;
 import use_case.game.GameInteractor;
@@ -101,7 +101,7 @@ public class AppBuilder {
     private ResultsViewModel resultsViewModel;
     private QuizPresenter quizPresenter;
     private QuizController quizController;
-    private QuestionDataAccessInterface questionDAO;
+    private QuestionDAI questionDAO;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);

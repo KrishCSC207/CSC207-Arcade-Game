@@ -1,12 +1,16 @@
 package entity;
 
+/**
+ * Entity representing a quiz question.
+ */
 public class QuizQuestion {
     private String questionId;
     private String imagePath;
     private String category;
     private String correctAnswer;
 
-    public QuizQuestion() {}
+    public QuizQuestion() {
+    }
 
     public QuizQuestion(String questionId, String imagePath, String category, String correctAnswer) {
         this.questionId = questionId;

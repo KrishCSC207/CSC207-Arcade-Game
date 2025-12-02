@@ -1,7 +1,7 @@
 package use_case.multiplechoice.submit;
 
-import entity.multiplechoice.QuizQuestion;
-import entity.multiplechoice.QuizSession;
+import entity.QuizQuestion;
+import entity.QuizSession;
 import use_case.multiplechoice.quiz.QuizOutputBoundary;
 import use_case.multiplechoice.quiz.QuizOutputData;
 
