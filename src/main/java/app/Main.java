@@ -20,6 +20,7 @@ public class Main {
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addConnectionsUseCase()
+                .addQuizUseCase()      // ensure quiz wiring is installed
                 .addCrosswordUseCase()
                 .build();
 

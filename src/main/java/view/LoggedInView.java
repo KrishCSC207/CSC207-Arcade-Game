@@ -14,6 +14,10 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+// NEW: import quiz boundary types
+import use_case.quiz.QuizInputBoundary;
+import use_case.quiz.QuizInputData;
+
 /**
  * The View for when the user is logged into the program.
  */
@@ -26,6 +30,9 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
     private CrosswordController crosswordController;
+
+    // NEW: multiple choice use-case input boundary provided by AppBuilder
+    private QuizInputBoundary multipleChoiceController;
 
     private final JLabel username;
 
@@ -141,6 +148,18 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         // Push bottom buttons to the bottom
         this.add(bottomButtons);
+
+        // NEW: Multiple Choice action wiring: prefer starting the use case if provided,
+        // otherwise fall back to switching to the multipleChoice view.
+        multipleChoiceBtn.addActionListener(e -> {
+            if (multipleChoiceController != null) {
+                // Start quiz with default category "GENERAL" (change as needed)
+                multipleChoiceController.execute(new QuizInputData("GENERAL"));
+            } else {
+                viewManagerModel.setState("multipleChoice");
+                viewManagerModel.firePropertyChange();
+            }
+        });
     }
 
     /**
@@ -177,5 +196,10 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     public void setCrosswordController(CrosswordController crosswordController) {
         this.crosswordController = crosswordController;
+    }
+
+    // NEW: allow the AppBuilder to provide the quiz use-case boundary
+    public void setMultipleChoiceController(QuizInputBoundary multipleChoiceController) {
+        this.multipleChoiceController = multipleChoiceController;
     }
 }
