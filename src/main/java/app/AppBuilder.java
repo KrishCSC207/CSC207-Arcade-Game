@@ -253,8 +253,10 @@ public class AppBuilder {
         final SimpleDaoSelector selector = new SimpleDaoSelector();
 
         // Interactors
-        final StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(selector, crosswordPresenter);
-        final SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(selector, crosswordPresenter);
+        final StartCrosswordInputBoundary startInteractor =
+                new StartCrosswordInteractor(selector, crosswordPresenter);
+        final SubmitCrosswordInputBoundary submitInteractor =
+                new SubmitCrosswordInteractor(selector, crosswordPresenter);
 
         // Controller
         crosswordController = new CrosswordController(startInteractor, submitInteractor, selector);
@@ -262,14 +264,16 @@ public class AppBuilder {
         // Build a local CardLayout root for the crossword flow
         crosswordRoot = new JPanel(new CardLayout());
 
-        // Create panels via factory and register with local card layout
+        // ✅ FIXED: pass viewManagerModel as the first argument
         JPanel decision = CrosswordView.createDecisionPanel(
+                viewManagerModel,
                 crosswordController,
                 crosswordViewModel,
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "EASY"),
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
         );
+
         JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
         JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
         JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
@@ -292,6 +296,7 @@ public class AppBuilder {
 
         return this;
     }
+
 
     public AppBuilder addMultipleChoiceUseCase() {
         // Wire submit answer interactor when quiz starts
