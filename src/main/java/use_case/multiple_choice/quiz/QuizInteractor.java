@@ -1,8 +1,8 @@
-package use_case.multiplechoice.quiz;
+package use_case.multiple_choice.quiz;
 
-import entity.multiplechoice.QuizQuestion;
-import entity.multiplechoice.QuizSession;
-import use_case.multiplechoice.QuestionDataAccessInterface;
+import entity.QuizQuestion;
+import entity.QuizSession;
+import use_case.multiple_choice.QuestionDAI;
 
 import java.util.List;
 
@@ -10,11 +10,11 @@ import java.util.List;
  * Interactor for starting a quiz.
  */
 public class QuizInteractor implements QuizInputBoundary {
-    private final QuestionDataAccessInterface questionDAO;
+    private final QuestionDAI questionDAO;
     private final QuizOutputBoundary quizPresenter;
     private QuizSession currentSession;
 
-    public QuizInteractor(QuestionDataAccessInterface questionDAO, QuizOutputBoundary quizPresenter) {
+    public QuizInteractor(QuestionDAI questionDAO, QuizOutputBoundary quizPresenter) {
         this.questionDAO = questionDAO;
         this.quizPresenter = quizPresenter;
     }

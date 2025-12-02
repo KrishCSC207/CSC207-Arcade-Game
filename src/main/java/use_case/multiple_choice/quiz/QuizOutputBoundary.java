@@ -1,4 +1,4 @@
-package use_case.multiplechoice.quiz;
+package use_case.multiple_choice.quiz;
 
 /**
  * Output boundary for quiz presentation.

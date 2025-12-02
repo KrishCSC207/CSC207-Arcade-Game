@@ -1,4 +1,4 @@
-package use_case.multiplechoice.quiz;
+package use_case.multiple_choice.quiz;
 
 /**
  * Input boundary for starting a quiz.

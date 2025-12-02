@@ -2,7 +2,7 @@ package use_case.quiz;
 
 import entity.QuizQuestion;
 import entity.QuizSession;
-import use_case.QuestionDAI;
+import use_case.multiple_choice.QuestionDAI;
 
 import java.util.List;
 

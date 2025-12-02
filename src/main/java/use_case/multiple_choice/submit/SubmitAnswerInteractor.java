@@ -1,9 +1,9 @@
-package use_case.multiplechoice.submit;
+package use_case.multiple_choice.submit;
 
-import entity.multiplechoice.QuizQuestion;
-import entity.multiplechoice.QuizSession;
-import use_case.multiplechoice.quiz.QuizOutputBoundary;
-import use_case.multiplechoice.quiz.QuizOutputData;
+import entity.QuizQuestion;
+import entity.QuizSession;
+import use_case.multiple_choice.quiz.QuizOutputBoundary;
+import use_case.multiple_choice.quiz.QuizOutputData;
 
 /**
  * Interactor for submitting and checking answers.

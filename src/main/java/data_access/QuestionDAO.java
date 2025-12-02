@@ -1,7 +1,7 @@
 package data_access;
 
 import entity.QuizQuestion;
-import use_case.QuestionDAI;
+import use_case.multiple_choice.QuestionDAI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;

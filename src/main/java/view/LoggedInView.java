@@ -7,13 +7,13 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
 import interface_adapter.crossword.CrosswordController;
-import interface_adapter.multiplechoice.QuizController;
-import interface_adapter.multiplechoice.QuizPresenter;
-import interface_adapter.multiplechoice.QuizViewModel;
-import interface_adapter.multiplechoice.ResultsViewModel;
-import use_case.multiplechoice.QuestionDataAccessInterface;
-import use_case.multiplechoice.quiz.QuizInteractor;
-import use_case.multiplechoice.submit.SubmitAnswerInteractor;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.QuizPresenter;
+import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiple_choice.ResultsViewModel;
+import use_case.multiple_choice.QuestionDAI;
+import use_case.multiple_choice.quiz.QuizInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -194,7 +194,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
      * Launches the Multiple Choice quiz.
      */
     private void launchMultipleChoiceQuiz() {
-        QuestionDataAccessInterface repository = new QuestionDAO();
+        QuestionDAI repository = new QuestionDAO();
         repository.loadData();
 
         QuizViewModel quizViewModel = new QuizViewModel();
@@ -229,9 +229,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
                         && quizInteractor.getCurrentSession() != null) {
                     SubmitAnswerInteractor submitAnswerInteractor =
                             new SubmitAnswerInteractor(
-                                    quizInteractor.getCurrentSession(),
-                                    presenter,
-                                    presenter);
+                                    quizInteractor.getCurrentSession(), presenter, presenter);
                     quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
                 }
                 if (selectionView.isDisplayable()) {
