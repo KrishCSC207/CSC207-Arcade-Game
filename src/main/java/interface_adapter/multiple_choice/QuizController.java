@@ -1,5 +1,6 @@
 package interface_adapter.multiple_choice;
 
+import use_case.multiple_choice.quiz.QuizInputBoundary;
 import use_case.multiple_choice.quiz.QuizInputData;
 import use_case.multiple_choice.quiz.QuizInteractor;
 import use_case.multiple_choice.submit.SubmitAnswerInputData;
@@ -9,7 +10,7 @@ import use_case.multiple_choice.submit.SubmitAnswerInteractor;
  * Controller that converts UI actions to use case inputs.
  */
 public class QuizController {
-    private final QuizInteractor quizInteractor;
+    private final QuizInputBoundary quizInteractor;
     private SubmitAnswerInteractor submitAnswerInteractor;
 
     public QuizController(QuizInteractor quizInteractor) {
@@ -41,7 +42,7 @@ public class QuizController {
         }
     }
 
-    public QuizInteractor getQuizInteractor() {
+    public QuizInputBoundary getQuizInteractor() {
         return quizInteractor;
     }
 }
