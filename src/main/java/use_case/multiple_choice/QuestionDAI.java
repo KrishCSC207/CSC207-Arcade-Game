@@ -1,6 +1,7 @@
 package use_case.multiple_choice;
 
 import entity.QuizQuestion;
+
 import java.util.List;
 
 /**
@@ -12,6 +13,11 @@ public interface QuestionDAI {
      */
     void loadData();
 
-
+    /**
+     * Gets questions by category.
+     *
+     * @param category The category to filter by
+     * @return List of QuizQuestion objects in the category
+     */
     List<QuizQuestion> getCategorizedQuestions(String category);
 }
