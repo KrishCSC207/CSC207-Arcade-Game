@@ -110,14 +110,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (connectionsController != null) {
-                    String code = JOptionPane.showInputDialog(
-                            LoggedInView.this,
-                            "Enter Connections game code:",
-                            "XBZQ"
-                    );
-                    if (code != null && !code.trim().isEmpty()) {
-                        connectionsController.executeLoad(code.trim());
-                    }
+                    connectionsController.executeLoadRandom();
                 } else {
                     JOptionPane.showMessageDialog(LoggedInView.this,
                             "Connections is not available right now.");
