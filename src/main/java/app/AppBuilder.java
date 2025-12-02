@@ -224,7 +224,9 @@ public class AppBuilder {
         crosswordRoot = new JPanel(new CardLayout());
 
         // Create panels via factory and register with local card layout
+
         JPanel decision = CrosswordView.createDecisionPanel(
+                viewManagerModel,
                 crosswordController,
                 crosswordViewModel,
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "EASY"),
