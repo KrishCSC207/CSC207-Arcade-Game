@@ -1,19 +1,13 @@
 package view;
 
-import data_access.multiplechoice.QuestionDAO;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
 import interface_adapter.crossword.CrosswordController;
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizPresenter;
-import interface_adapter.multiple_choice.QuizViewModel;
-import interface_adapter.multiple_choice.ResultsViewModel;
-import use_case.multiple_choice.QuestionDAI;
-import use_case.multiple_choice.quiz.QuizInteractor;
-import use_case.multiple_choice.submit.SubmitAnswerInteractor;
+import interface_adapter.multiplechoice.QuizController;
+import interface_adapter.multiplechoice.ResultsViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,6 +28,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
     private CrosswordController crosswordController;
+    private QuizController multipleChoiceController;
 
     private final JLabel username;
 
@@ -133,8 +128,16 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             viewManagerModel.firePropertyChange();
         });
 
-        // Multiple Choice button action: launch the Multiple Choice quiz
-        multipleChoiceBtn.addActionListener(e -> launchMultipleChoiceQuiz());
+        // Multiple Choice button action: switch to category selection view
+        multipleChoiceBtn.addActionListener(e -> {
+            if (multipleChoiceController != null) {
+                viewManagerModel.setState("category selection");
+                viewManagerModel.firePropertyChange();
+            } else {
+                JOptionPane.showMessageDialog(LoggedInView.this,
+                        "Multiple Choice is not available right now.");
+            }
+        });
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -171,6 +174,22 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             LoggedInState state = (LoggedInState) evt.getNewValue();
             // UPDATED: Concatenate "Hello, " with the username
             username.setText("Hello, " + state.getUsername());
+        } else if (evt.getPropertyName().equals("accuracy")) {
+            // Update high score when quiz completes
+            double accuracy = (double) evt.getNewValue();
+            int percentage = (int) (accuracy * 100);
+            
+            int currentHighScore = 0;
+            try {
+                currentHighScore = Integer.parseInt(highestScore);
+            } catch (NumberFormatException ex) {
+                currentHighScore = 0;
+            }
+            
+            if (percentage > currentHighScore) {
+                highestScore = String.valueOf(percentage);
+                highScoreLabel.setText("Highest Multiple Choice Score: " + highestScore + "%");
+            }
         }
     }
 
@@ -190,65 +209,11 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         this.crosswordController = crosswordController;
     }
 
-    /**
-     * Launches the Multiple Choice quiz.
-     */
-    private void launchMultipleChoiceQuiz() {
-        QuestionDAI repository = new QuestionDAO();
-        repository.loadData();
+    public void setMultipleChoiceController(QuizController multipleChoiceController) {
+        this.multipleChoiceController = multipleChoiceController;
+    }
 
-        QuizViewModel quizViewModel = new QuizViewModel();
-        ResultsViewModel resultsViewModel = new ResultsViewModel();
-        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
-
-        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
-        QuizController quizController = new QuizController(quizInteractor);
-
-        CategorySelectionView selectionView = new CategorySelectionView(quizViewModel);
-        selectionView.setQuizController(quizController);
-        QuizView quizView = new QuizView(quizController, quizViewModel);
-        ResultsView resultsView = new ResultsView(resultsViewModel);
-
-        // Callback to update high score when quiz finishes
-        resultsView.setOnFinishCallback(score -> {
-            int currentHighScore = 0;
-            try {
-                currentHighScore = Integer.parseInt(highestScore);
-            } catch (NumberFormatException ex) {
-                currentHighScore = 0;
-            }
-            if (score > currentHighScore) {
-                highestScore = String.valueOf(score);
-                highScoreLabel.setText("Highest Multiple Choice Score: " + highestScore + "%");
-            }
-        });
-
-        quizViewModel.addPropertyChangeListener(evt -> {
-            if ("imagePath".equals(evt.getPropertyName())) {
-                if (!quizController.hasSubmitAnswerInteractor()
-                        && quizInteractor.getCurrentSession() != null) {
-                    SubmitAnswerInteractor submitAnswerInteractor =
-                            new SubmitAnswerInteractor(
-                                    quizInteractor.getCurrentSession(), presenter, presenter);
-                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
-                }
-                if (selectionView.isDisplayable()) {
-                    selectionView.dispose();
-                    quizView.setVisible(true);
-                }
-            }
-        });
-
-        resultsViewModel.addPropertyChangeListener(evt -> {
-            String name = evt.getPropertyName();
-            if ("accuracy".equals(name) || "totalTimeMs".equals(name)) {
-                SwingUtilities.invokeLater(() -> {
-                    quizView.dispose();
-                    resultsView.setVisible(true);
-                });
-            }
-        });
-
-        selectionView.setVisible(true);
+    public void setResultsViewModel(ResultsViewModel resultsViewModel) {
+        resultsViewModel.addPropertyChangeListener(this);
     }
 }

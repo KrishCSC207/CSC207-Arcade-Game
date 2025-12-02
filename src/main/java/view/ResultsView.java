@@ -1,28 +1,28 @@
 package view;
 
-import interface_adapter.multiple_choice.ResultsViewModel;
+import interface_adapter.multiplechoice.ResultsViewModel;
+import interface_adapter.ViewManagerModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.function.Consumer;
 
 /**
  * View that displays the final quiz results.
  */
-public class ResultsView extends JFrame implements PropertyChangeListener {
+public class ResultsView extends JPanel implements PropertyChangeListener {
+    private final String viewName = "results";
     private final ResultsViewModel viewModel;
+    private final ViewManagerModel viewManagerModel;
     private final JLabel accuracyLabel;
     private final JLabel timeLabel;
-    private Consumer<Integer> onFinishCallback;
 
-    public ResultsView(ResultsViewModel viewModel) {
+    public ResultsView(ResultsViewModel viewModel, ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;
+        this.viewManagerModel = viewManagerModel;
         viewModel.addPropertyChangeListener(this);
 
-        setTitle("Quiz Results");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
@@ -37,14 +37,11 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         timeLabel = new JLabel("Time: 0s", SwingConstants.CENTER);
         timeLabel.setFont(new Font("Arial", Font.PLAIN, 24));
 
-        JButton finishButton = new JButton("Finish");
+        JButton finishButton = new JButton("Back to Menu");
         finishButton.setFont(new Font("Arial", Font.BOLD, 18));
         finishButton.addActionListener(e -> {
-            if (onFinishCallback != null) {
-                int percentage = (int) (viewModel.getAccuracy() * 100);
-                onFinishCallback.accept(percentage);
-            }
-            dispose();
+            viewManagerModel.setState("logged in");
+            viewManagerModel.firePropertyChange();
         });
 
         panel.add(titleLabel);
@@ -53,13 +50,10 @@ public class ResultsView extends JFrame implements PropertyChangeListener {
         panel.add(finishButton);
 
         add(panel, BorderLayout.CENTER);
-
-        setSize(400, 350);
-        setLocationRelativeTo(null);
     }
 
-    public void setOnFinishCallback(Consumer<Integer> callback) {
-        this.onFinishCallback = callback;
+    public String getViewName() {
+        return viewName;
     }
 
     @Override

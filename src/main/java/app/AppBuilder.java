@@ -19,6 +19,23 @@ import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
 import view.ConnectionsGameView;
+import interface_adapter.crossword.CrosswordController;
+import interface_adapter.crossword.CrosswordPresenter;
+import interface_adapter.crossword.CrosswordViewModel;
+import interface_adapter.multiplechoice.QuizController;
+import interface_adapter.multiplechoice.QuizPresenter;
+import interface_adapter.multiplechoice.QuizViewModel;
+import interface_adapter.multiplechoice.ResultsViewModel;
+import use_case.crossword.start.StartCrosswordInputBoundary;
+import use_case.crossword.start.StartCrosswordInteractor;
+import use_case.crossword.submit.SubmitCrosswordInputBoundary;
+import use_case.crossword.submit.SubmitCrosswordInteractor;
+import use_case.multiplechoice.QuestionDataAccessInterface;
+import use_case.multiplechoice.quiz.QuizInteractor;
+import use_case.multiplechoice.submit.SubmitAnswerInteractor;
+import data_access.multiplechoice.QuestionDAO;
+import data_access.SimpleDaoSelector;
+import view.CrosswordView;
 import use_case.game.GameInteractor;
 import use_case.game.GameSubmitGuessInteractor;
 import use_case.game.GameStateRepository;
@@ -73,6 +90,19 @@ public class AppBuilder {
     private GameStateRepository gameStateRepository;
     private GameDataAccessInterface gameDataAccess;
 
+    // Crossword additions
+    private CrosswordViewModel crosswordViewModel;
+    private CrosswordPresenter crosswordPresenter;
+    private CrosswordController crosswordController;
+    private JPanel crosswordRoot;
+
+    // Multiple choice additions
+    private QuizViewModel quizViewModel;
+    private ResultsViewModel resultsViewModel;
+    private QuizPresenter quizPresenter;
+    private QuizController quizController;
+    private QuestionDataAccessInterface questionDAO;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
@@ -108,6 +138,30 @@ public class AppBuilder {
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
         connectionsGameView = new ConnectionsGameView(connectionsViewModel, null); // controller set later
         cardPanel.add(connectionsGameView, connectionsViewModel.getViewName());
+        return this;
+    }
+
+    public AppBuilder addMultipleChoiceViews() {
+        quizViewModel = new QuizViewModel();
+        resultsViewModel = new ResultsViewModel();
+        quizPresenter = new QuizPresenter(quizViewModel, resultsViewModel, viewManagerModel);
+
+        questionDAO = new QuestionDAO();
+        questionDAO.loadData();
+
+        QuizInteractor quizInteractor = new QuizInteractor(questionDAO, quizPresenter);
+        quizController = new QuizController(quizInteractor);
+
+        CategorySelectionView categorySelectionView = new CategorySelectionView(quizViewModel);
+        categorySelectionView.setQuizController(quizController);
+        cardPanel.add(categorySelectionView, categorySelectionView.getViewName());
+
+        QuizView quizView = new QuizView(quizController, quizViewModel);
+        cardPanel.add(quizView, quizView.getViewName());
+
+        ResultsView resultsView = new ResultsView(resultsViewModel, viewManagerModel);
+        cardPanel.add(resultsView, resultsView.getViewName());
+
         return this;
     }
 
@@ -166,7 +220,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addConnectionsUseCases() {
+    public AppBuilder addConnectionsUseCase() {
         // Set up repository and DAO
         gameStateRepository = new InMemoryGameStateRepository();
         gameDataAccess = new ApiGameDataAccess();
@@ -190,6 +244,82 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addCrosswordUseCase() {
+        // ViewModel and Presenter
+        crosswordViewModel = new CrosswordViewModel();
+        crosswordPresenter = new CrosswordPresenter(crosswordViewModel);
+
+        // DAO selector shared by both use cases
+        final SimpleDaoSelector selector = new SimpleDaoSelector();
+
+        // Interactors
+        final StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(selector, crosswordPresenter);
+        final SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(selector, crosswordPresenter);
+
+        // Controller
+        crosswordController = new CrosswordController(startInteractor, submitInteractor, selector);
+
+        // Build a local CardLayout root for the crossword flow
+        crosswordRoot = new JPanel(new CardLayout());
+
+        // Create panels via factory and register with local card layout
+        JPanel decision = CrosswordView.createDecisionPanel(
+                crosswordController,
+                crosswordViewModel,
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "EASY"),
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
+                () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
+        );
+        JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
+        JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
+        JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
+        JPanel exit   = CrosswordView.createExitPanel(crosswordViewModel);
+
+        crosswordRoot.add(decision, "DECISION");
+        crosswordRoot.add(easy, "EASY");
+        crosswordRoot.add(medium, "MEDIUM");
+        crosswordRoot.add(hard, "HARD");
+        crosswordRoot.add(exit, "EXIT");
+        ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "DECISION");
+
+        // Add crossword as a single card to the app's ViewManager
+        cardPanel.add(crosswordRoot, "crossword");
+
+        // Wire entrance from LoggedInView
+        if (loggedInView != null) {
+            loggedInView.setCrosswordController(crosswordController);
+        }
+
+        return this;
+    }
+
+    public AppBuilder addMultipleChoiceUseCase() {
+        // Wire submit answer interactor when quiz starts
+        // Create a new SubmitAnswerInteractor each time a quiz starts (when imagePath changes)
+        // to ensure it references the current QuizSession
+        quizViewModel.addPropertyChangeListener(evt -> {
+            if ("imagePath".equals(evt.getPropertyName())) {
+                if (quizController.getQuizInteractor().getCurrentSession() != null) {
+                    SubmitAnswerInteractor submitAnswerInteractor =
+                            new SubmitAnswerInteractor(
+                                    quizController.getQuizInteractor().getCurrentSession(),
+                                    quizPresenter,
+                                    quizPresenter);
+                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
+                }
+            }
+        });
+
+        // Wire controller into LoggedInView
+        if (loggedInView != null) {
+            loggedInView.setMultipleChoiceController(quizController);
+            // Wire ResultsViewModel to LoggedInView for high score updates
+            loggedInView.setResultsViewModel(resultsViewModel);
+        }
+
+        return this;
+    }
+
     public JFrame build() {
         final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -201,6 +331,4 @@ public class AppBuilder {
 
         return application;
     }
-
-
 }

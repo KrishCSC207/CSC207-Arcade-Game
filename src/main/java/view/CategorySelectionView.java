@@ -1,7 +1,7 @@
 package view;
 
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiplechoice.QuizController;
+import interface_adapter.multiplechoice.QuizViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +13,8 @@ import java.beans.PropertyChangeListener;
 /**
  * View that allows the user to select a quiz category.
  */
-public class CategorySelectionView extends JFrame implements PropertyChangeListener {
+public class CategorySelectionView extends JPanel implements PropertyChangeListener {
+    private final String viewName = "category selection";
     private final QuizViewModel quizViewModel;
     private QuizController quizController;
 
@@ -25,6 +26,7 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
         this.quizViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel("Choose a module", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
 
         final JPanel choices = new JPanel();
         options = new JRadioButton[6];
@@ -58,10 +60,10 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
         JPanel bottom = new JPanel();
         bottom.add(submit);
         add(bottom, BorderLayout.SOUTH);
+    }
 
-        setSize(420, 180);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    public String getViewName() {
+        return viewName;
     }
 
     public void setQuizController(QuizController quizController) {
