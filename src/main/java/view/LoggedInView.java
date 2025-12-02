@@ -1,13 +1,13 @@
 package view;
 
-import interface_adapter.logged_in.LoggedInState;
-import interface_adapter.logged_in.LoggedInViewModel;
-import interface_adapter.logout.LogoutController;
-import interface_adapter.ViewManagerModel;
-import interface_adapter.connections.ConnectionsController;
-import interface_adapter.crossword.CrosswordController;
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.ResultsViewModel;
+import interfaceadapter.logged_in.LoggedInState;
+import interfaceadapter.logged_in.LoggedInViewModel;
+import interfaceadapter.logout.LogoutController;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.connections.ConnectionsController;
+import interfaceadapter.crossword.CrosswordController;
+import interfaceadapter.multiple_choice.QuizController;
+import interfaceadapter.multiple_choice.ResultsViewModel;
 
 import javax.swing.*;
 import java.awt.*;

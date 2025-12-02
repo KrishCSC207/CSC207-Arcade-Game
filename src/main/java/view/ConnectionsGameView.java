@@ -1,9 +1,9 @@
 package view;
 
 // Imports for the new architecture
-import interface_adapter.connections.ConnectionsController;
-import interface_adapter.connections.ConnectionsState;
-import interface_adapter.connections.ConnectionsViewModel;
+import interfaceadapter.connections.ConnectionsController;
+import interfaceadapter.connections.ConnectionsState;
+import interfaceadapter.connections.ConnectionsViewModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 

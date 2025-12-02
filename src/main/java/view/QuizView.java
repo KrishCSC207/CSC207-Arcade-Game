@@ -1,7 +1,7 @@
 package view;
 
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizViewModel;
+import interfaceadapter.multiple_choice.QuizController;
+import interfaceadapter.multiple_choice.QuizViewModel;
 
 import javax.swing.*;
 import java.awt.*;
