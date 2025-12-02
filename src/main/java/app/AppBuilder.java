@@ -18,6 +18,7 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
+import use_case.quiz.QuizInputData;
 import view.ConnectionsGameView;
 import interface_adapter.crossword.CrosswordController;
 import interface_adapter.crossword.CrosswordPresenter;
@@ -54,6 +55,21 @@ import view.*;
 import javax.swing.*;
 import java.awt.*;
 
+// NEW imports for Quiz wiring
+import data_access.QuestionDAO;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.QuizPresenter;
+import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiple_choice.ResultsViewModel;
+import use_case.QuestionDAI;
+import use_case.quiz.QuizInteractor;
+import use_case.submit.SubmitAnswerInteractor;
+import use_case.quiz.QuizInputBoundary;
+import use_case.quiz.QuizOutputBoundary;
+import view.CategorySelectionView;
+import view.QuizView;
+import view.ResultsView;
+
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
@@ -87,6 +103,9 @@ public class AppBuilder {
     private CrosswordPresenter crosswordPresenter;
     private CrosswordController crosswordController;
     private JPanel crosswordRoot;
+
+    // NEW field to hold the quiz selector
+    private CategorySelectionView selectionView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -254,14 +273,96 @@ public class AppBuilder {
         return this;
     }
 
+    // NEW: quiz use case moved into the builder so the LoggedInView button gets wired
+    public AppBuilder addQuizUseCase() {
+        // Repository for questions
+        QuestionDAI repository = new QuestionDAO();
+
+        // View models and presenter
+        QuizViewModel quizViewModel = new QuizViewModel();
+        ResultsViewModel resultsViewModel = new ResultsViewModel();
+        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
+
+        // Interactor and controller
+        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
+        QuizController quizController = new QuizController(quizInteractor);
+
+        // Views (keep references in fields where needed)
+        this.selectionView = new CategorySelectionView(quizViewModel); // assign to field
+        selectionView.setQuizController(quizController);
+        QuizView quizView = new QuizView(quizController, quizViewModel);
+        ResultsView resultsView = new ResultsView(resultsViewModel);
+
+        // Lazy-install SubmitAnswerInteractor when the quiz session becomes available
+        quizViewModel.addPropertyChangeListener(evt -> {
+            if ("imagePath".equals(evt.getPropertyName())) {
+                if (!quizController.hasSubmitAnswerInteractor()
+                        && quizInteractor.getCurrentSession() != null) {
+                    SubmitAnswerInteractor submitAnswerInteractor =
+                            new SubmitAnswerInteractor(
+                                    quizInteractor.getCurrentSession(),
+                                    presenter,
+                                    presenter);
+                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
+                }
+                // If the selection window was visible, close it and show the quiz view
+                if (selectionView.isDisplayable()) {
+                    SwingUtilities.invokeLater(() -> {
+                        selectionView.dispose();
+                        quizView.setVisible(true);
+                    });
+                } else {
+                    SwingUtilities.invokeLater(() -> quizView.setVisible(true));
+                }
+            }
+        });
+
+        // Show results when the results VM updates
+        resultsViewModel.addPropertyChangeListener(evt -> {
+            String name = evt.getPropertyName();
+            if ("accuracy".equals(name) || "totalTimeMs".equals(name)) {
+                SwingUtilities.invokeLater(() -> {
+                    quizView.dispose();
+                    resultsView.setVisible(true);
+                });
+            }
+        });
+
+        // Wire the quiz "opener" into the LoggedInView so its button will open the category selector.
+        // The selectionView has the QuizController and will start the interactor when user picks a category.
+        if (loggedInView != null) {
+            final QuizInputBoundary openSelection = new QuizInputBoundary() {
+                @Override
+                public void execute(QuizInputData inputData) {
+                    // show the category selection UI (ignore inputData here)
+                    SwingUtilities.invokeLater(() -> selectionView.setVisible(true));
+                }
+            };
+            loggedInView.setMultipleChoiceController(openSelection);
+        }
+
+        return this;
+    }
+
     public JFrame build() {
         final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(signupView.getViewName());
-        viewManagerModel.firePropertyChange();
+        // Show the category selection view first if available
+        if (selectionView != null) {
+            SwingUtilities.invokeLater(() -> {
+                selectionView.setVisible(true);
+                selectionView.toFront();
+            });
+        }
+
+        // Safely set initial card-state if signupView was created, otherwise skip
+        if (signupView != null) {
+            viewManagerModel.setState(signupView.getViewName());
+            viewManagerModel.firePropertyChange();
+        }
 
         return application;
     }

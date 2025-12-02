@@ -63,7 +63,7 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
 
         setSize(420, 180);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // changed from EXIT_ON_CLOSE
     }
 
     public void setQuizController(QuizController quizController) {

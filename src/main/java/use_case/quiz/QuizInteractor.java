@@ -5,6 +5,7 @@ import entity.QuizSession;
 import use_case.QuestionDAI;
 
 import java.util.List;
+import java.util.Collections;
 
 /**
  * The QuizInteractor class initializes a new quiz session.
@@ -37,11 +38,28 @@ public class QuizInteractor implements QuizInputBoundary {
         // 2) Get questions with respect to the chosen category
         List<QuizQuestion> questions = questionDAO.getCategorizedQuestions(category);
 
+        // Guard against null/empty question lists to avoid NPE
+        if (questions == null || questions.isEmpty()) {
+            // create an empty session so callers can still inspect it safely
+            currentSession = new QuizSession(Collections.emptyList());
+            // prepare output indicating no questions are available
+            QuizOutputData emptyOutput = new QuizOutputData(null, "No questions available");
+            quizPresenter.prepareQuizView(emptyOutput);
+            return;
+        }
+
         // 3) Build new Quiz Session
         currentSession = new QuizSession(questions);
 
         // 4) Get current(first) question and prepare output data
         QuizQuestion firstQuestion = currentSession.getCurrentQuestion();
+        // defensive check (shouldn't be null if questions non-empty, but guard anyway)
+        if (firstQuestion == null) {
+            QuizOutputData emptyOutput = new QuizOutputData(null, "No questions available");
+            quizPresenter.prepareQuizView(emptyOutput);
+            return;
+        }
+
         String progressLabel = String.format("Question %d/%d",
                 currentSession.getCurrentQuestionIndex() + 1,
                 currentSession.getTotalQuestions());
