@@ -1,10 +1,19 @@
 package view;
 
+import data_access.multiplechoice.QuestionDAO;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
+import interface_adapter.crossword.CrosswordController;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.QuizPresenter;
+import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiple_choice.ResultsViewModel;
+import use_case.multiple_choice.QuestionDAI;
+import use_case.multiple_choice.quiz.QuizInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +33,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
+    private CrosswordController crosswordController;
 
     private final JLabel username;
 
@@ -116,6 +126,16 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             }
         });
 
+        // Crossword button action: switch to crossword card managed by ViewManager
+        crosswordBtn.addActionListener(e -> {
+            // Ensure controller exists (wired in AppBuilder); even if null, we can still show the view
+            viewManagerModel.setState("crossword");
+            viewManagerModel.firePropertyChange();
+        });
+
+        // Multiple Choice button action: launch the Multiple Choice quiz
+        multipleChoiceBtn.addActionListener(e -> launchMultipleChoiceQuiz());
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Add some space at the very top
@@ -164,5 +184,71 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     public void setConnectionsController(ConnectionsController connectionsController) {
         this.connectionsController = connectionsController;
+    }
+
+    public void setCrosswordController(CrosswordController crosswordController) {
+        this.crosswordController = crosswordController;
+    }
+
+    /**
+     * Launches the Multiple Choice quiz.
+     */
+    private void launchMultipleChoiceQuiz() {
+        QuestionDAI repository = new QuestionDAO();
+        repository.loadData();
+
+        QuizViewModel quizViewModel = new QuizViewModel();
+        ResultsViewModel resultsViewModel = new ResultsViewModel();
+        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
+
+        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
+        QuizController quizController = new QuizController(quizInteractor);
+
+        CategorySelectionView selectionView = new CategorySelectionView(quizViewModel);
+        selectionView.setQuizController(quizController);
+        QuizView quizView = new QuizView(quizController, quizViewModel);
+        ResultsView resultsView = new ResultsView(resultsViewModel);
+
+        // Callback to update high score when quiz finishes
+        resultsView.setOnFinishCallback(score -> {
+            int currentHighScore = 0;
+            try {
+                currentHighScore = Integer.parseInt(highestScore);
+            } catch (NumberFormatException ex) {
+                currentHighScore = 0;
+            }
+            if (score > currentHighScore) {
+                highestScore = String.valueOf(score);
+                highScoreLabel.setText("Highest Multiple Choice Score: " + highestScore + "%");
+            }
+        });
+
+        quizViewModel.addPropertyChangeListener(evt -> {
+            if ("imagePath".equals(evt.getPropertyName())) {
+                if (!quizController.hasSubmitAnswerInteractor()
+                        && quizInteractor.getCurrentSession() != null) {
+                    SubmitAnswerInteractor submitAnswerInteractor =
+                            new SubmitAnswerInteractor(
+                                    quizInteractor.getCurrentSession(), presenter, presenter);
+                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
+                }
+                if (selectionView.isDisplayable()) {
+                    selectionView.dispose();
+                    quizView.setVisible(true);
+                }
+            }
+        });
+
+        resultsViewModel.addPropertyChangeListener(evt -> {
+            String name = evt.getPropertyName();
+            if ("accuracy".equals(name) || "totalTimeMs".equals(name)) {
+                SwingUtilities.invokeLater(() -> {
+                    quizView.dispose();
+                    resultsView.setVisible(true);
+                });
+            }
+        });
+
+        selectionView.setVisible(true);
     }
 }

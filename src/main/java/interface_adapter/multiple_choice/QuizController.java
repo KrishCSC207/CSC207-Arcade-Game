@@ -1,17 +1,16 @@
 package interface_adapter.multiple_choice;
 
-import use_case.quiz.QuizInputData;
-import use_case.quiz.QuizInteractor;
-import use_case.submit.SubmitAnswerInputData;
-import use_case.submit.SubmitAnswerInteractor;
+import use_case.multiple_choice.quiz.QuizInputData;
+import use_case.multiple_choice.quiz.QuizInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerInputData;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
 
 /**
- * Controller 仅负责把界面动作转换为用例输入。
- * 不依赖 Presenter，实现与展示层解耦。
+ * Controller that converts UI actions to use case inputs.
  */
 public class QuizController {
-    private final QuizInteractor quizInteractor;
-    private SubmitAnswerInteractor submitAnswerInteractor;
+    private final use_case.multiple_choice.quiz.QuizInteractor quizInteractor;
+    private use_case.multiple_choice.submit.SubmitAnswerInteractor submitAnswerInteractor;
 
     public QuizController(QuizInteractor quizInteractor) {
         this.quizInteractor = quizInteractor;
@@ -31,7 +30,7 @@ public class QuizController {
 
     public void submitAnswer(String answer) {
         if (submitAnswerInteractor != null) {
-            SubmitAnswerInputData inputData = new SubmitAnswerInputData(answer);
+            use_case.multiple_choice.submit.SubmitAnswerInputData inputData = new SubmitAnswerInputData(answer);
             submitAnswerInteractor.execute(inputData);
         }
     }

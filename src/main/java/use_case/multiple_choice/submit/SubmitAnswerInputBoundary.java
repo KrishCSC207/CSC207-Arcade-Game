@@ -1,4 +1,4 @@
-package use_case.multiplechoice.submit;
+package use_case.multiple_choice.submit;
 
 /**
  * Input boundary for submitting an answer.

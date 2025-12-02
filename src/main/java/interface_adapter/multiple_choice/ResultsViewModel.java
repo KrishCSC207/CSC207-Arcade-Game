@@ -8,7 +8,7 @@ import java.beans.PropertyChangeSupport;
  */
 public class ResultsViewModel {
     private final PropertyChangeSupport support;
-    
+
     private double accuracy;
     private long totalTimeMs;
 
