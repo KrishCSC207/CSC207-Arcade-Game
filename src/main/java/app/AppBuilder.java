@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.PwnedPasswordDataAccessObject; // NEW IMPORT
+import data_access.PwnedPasswordDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.change_password.ChangePasswordController;

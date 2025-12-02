@@ -1,0 +1,24 @@
+package use_case;
+
+import entity.QuizQuestion;
+import java.util.List;
+
+/**
+ * Interface defining the contract for data access to quiz questions.
+ */
+public interface QuestionDAI {
+    /**
+     * Loads data from the data source.
+     */
+    void loadData();
+
+    /**
+     * Gets a random selection of questions.
+     *
+     * @param count Number of questions to retrieve
+     * @return List of random QuizQuestion objects
+     */
+    // List<QuizQuestion> getQuestions(int count);
+
+    List<QuizQuestion> getCategorizedQuestions(String category);
+}
