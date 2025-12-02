@@ -65,10 +65,8 @@ import use_case.QuestionDAI;
 import use_case.quiz.QuizInteractor;
 import use_case.submit.SubmitAnswerInteractor;
 import use_case.quiz.QuizInputBoundary;
-import use_case.quiz.QuizOutputBoundary;
-import view.CategorySelectionView;
+import use_case.quiz.QuizInputData;
 import view.QuizView;
-import view.ResultsView;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -104,8 +102,8 @@ public class AppBuilder {
     private CrosswordController crosswordController;
     private JPanel crosswordRoot;
 
-    // NEW field to hold the quiz selector
-    private CategorySelectionView selectionView;
+    // NEW field to hold the quiz window
+    private QuizView quizPanel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -287,11 +285,12 @@ public class AppBuilder {
         QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
         QuizController quizController = new QuizController(quizInteractor);
 
-        // Views (keep references in fields where needed)
-        this.selectionView = new CategorySelectionView(quizViewModel); // assign to field
-        selectionView.setQuizController(quizController);
-        QuizView quizView = new QuizView(quizController, quizViewModel);
-        ResultsView resultsView = new ResultsView(resultsViewModel);
+        // Combined QuizView (embedded JPanel)
+        this.quizPanel = new QuizView(quizViewModel, resultsViewModel);
+        quizPanel.setQuizController(quizController);
+
+        // Add quizPanel to the app's central cardPanel under "multipleChoice"
+        cardPanel.add(quizPanel, "multipleChoice");
 
         // Lazy-install SubmitAnswerInteractor when the quiz session becomes available
         quizViewModel.addPropertyChangeListener(evt -> {
@@ -305,37 +304,20 @@ public class AppBuilder {
                                     presenter);
                     quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
                 }
-                // If the selection window was visible, close it and show the quiz view
-                if (selectionView.isDisplayable()) {
-                    SwingUtilities.invokeLater(() -> {
-                        selectionView.dispose();
-                        quizView.setVisible(true);
-                    });
-                } else {
-                    SwingUtilities.invokeLater(() -> quizView.setVisible(true));
-                }
-            }
-        });
-
-        // Show results when the results VM updates
-        resultsViewModel.addPropertyChangeListener(evt -> {
-            String name = evt.getPropertyName();
-            if ("accuracy".equals(name) || "totalTimeMs".equals(name)) {
-                SwingUtilities.invokeLater(() -> {
-                    quizView.dispose();
-                    resultsView.setVisible(true);
-                });
+                // do NOT auto-show the quiz window here — the opener controls it
             }
         });
 
         // Wire the quiz "opener" into the LoggedInView so its button will open the category selector.
-        // The selectionView has the QuizController and will start the interactor when user picks a category.
         if (loggedInView != null) {
             final QuizInputBoundary openSelection = new QuizInputBoundary() {
                 @Override
                 public void execute(QuizInputData inputData) {
-                    // show the category selection UI (ignore inputData here)
-                    SwingUtilities.invokeLater(() -> selectionView.setVisible(true));
+                    // ensure the app shows the quiz card, then open selection dialog in the embedded panel
+                    viewManagerModel.setState("multipleChoice");
+                    viewManagerModel.firePropertyChange();
+                    // open selection dialog on the panel
+                    quizPanel.showWithSelection();
                 }
             };
             loggedInView.setMultipleChoiceController(openSelection);
@@ -350,13 +332,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        // Show the category selection view first if available
-        if (selectionView != null) {
-            SwingUtilities.invokeLater(() -> {
-                selectionView.setVisible(true);
-                selectionView.toFront();
-            });
-        }
+        // DO NOT show quiz at startup; remove previous selectionView startup behavior
 
         // Safely set initial card-state if signupView was created, otherwise skip
         if (signupView != null) {
