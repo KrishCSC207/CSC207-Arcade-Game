@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.crossword.CrosswordController;
 import interface_adapter.crossword.CrosswordViewModel;
 
@@ -17,12 +18,13 @@ import java.util.List;
 public class CrosswordView {
 
     // Factory for Decision UI (keeps the original DecisionPage in place)
-    public static JPanel createDecisionPanel(CrosswordController controller,
+    public static JPanel createDecisionPanel(ViewManagerModel viewManagerModel,
+                                             CrosswordController controller,
                                              CrosswordViewModel viewModel,
                                              Runnable showEasy,
                                              Runnable showMedium,
                                              Runnable showHard) {
-        return new DecisionPanel(controller, viewModel, showEasy, showMedium, showHard);
+        return new DecisionPanel(viewManagerModel, controller, viewModel, showEasy, showMedium, showHard);
     }
 
     // Factory for Puzzle UI for a difficulty (keeps original easy/medium/hard constructors compatible)
@@ -40,7 +42,8 @@ public class CrosswordView {
     // ----------------------- Implementation details -----------------------
 
     private static class DecisionPanel extends JPanel {
-        DecisionPanel(CrosswordController controller,
+        DecisionPanel(ViewManagerModel viewManagerModel,
+                      CrosswordController controller,
                       CrosswordViewModel viewModel,
                       Runnable showEasy,
                       Runnable showMedium,
@@ -48,6 +51,18 @@ public class CrosswordView {
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+
+            // top header with Back button (left)
+            JPanel header = new JPanel(new BorderLayout());
+            JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+            JButton backBtn = new JButton("Back");
+            backBtn.addActionListener(e -> {
+                viewManagerModel.setState("logged in");
+                viewManagerModel.firePropertyChange();
+            });
+            leftPanel.add(backBtn);
+            header.add(leftPanel, BorderLayout.WEST);
+            add(header);
 
             add(new JLabel("Please choose one of the following difficulties:"));
             add(Box.createVerticalStrut(12));
@@ -221,26 +236,45 @@ public class CrosswordView {
         ExitPanel(CrosswordViewModel viewModel) {
             this.viewModel = viewModel;
             this.viewModel.addPropertyChangeListener(this);
+            setLayout(new BorderLayout());
 
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+            JButton backBtn = new JButton("Back");
+            backBtn.addActionListener(e -> {
+                Container c = this.getParent();
+                while (c != null && !(c.getLayout() instanceof CardLayout)) {
+                    c = c.getParent();
+                }
+                if (c != null) {
+                    ((CardLayout) c.getLayout()).show(c, "DECISION");
+                }
+            });
+
+            JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            topPanel.add(backBtn);
+            add(topPanel, BorderLayout.NORTH);
+
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
             JLabel titleLabel = new JLabel("Thank you for Playing!");
             titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(titleLabel);
-
-            add(Box.createVerticalStrut(12));
 
             timeLabel = new JLabel("Your time was: 00:00");
             timeLabel.setFont(new Font("Monospaced", Font.BOLD, 18));
             timeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(timeLabel);
-
-            add(Box.createVerticalStrut(12));
 
             JLabel awesomeLabel = new JLabel("Awesome work!");
             awesomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            add(awesomeLabel);
+
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(titleLabel);
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(timeLabel);
+            centerPanel.add(Box.createVerticalStrut(12));
+            centerPanel.add(awesomeLabel);
+
+            add(centerPanel, BorderLayout.CENTER);
+
         }
 
         @Override
