@@ -1,7 +1,7 @@
 package view;
 
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiplechoice.QuizController;
+import interface_adapter.multiplechoice.QuizViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,8 @@ import java.beans.PropertyChangeListener;
 /**
  * Main quiz view that displays questions and answer buttons.
  */
-public class QuizView extends JFrame implements PropertyChangeListener {
+public class QuizView extends JPanel implements PropertyChangeListener {
+    private final String viewName = "quiz";
     private final QuizController controller;
     private final QuizViewModel viewModel;
 
@@ -31,8 +32,6 @@ public class QuizView extends JFrame implements PropertyChangeListener {
 
         viewModel.addPropertyChangeListener(this);
 
-        setTitle("Multiple Choice Quiz");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         imagePanel = new ScaledImagePanel();
@@ -72,10 +71,10 @@ public class QuizView extends JFrame implements PropertyChangeListener {
 
         bottomPanel.add(buttonPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
 
-        pack();
-        setSize(800, 600);
-        setLocationRelativeTo(null);
+    public String getViewName() {
+        return viewName;
     }
 
     @Override

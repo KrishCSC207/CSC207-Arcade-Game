@@ -22,10 +22,18 @@ import view.ConnectionsGameView;
 import interface_adapter.crossword.CrosswordController;
 import interface_adapter.crossword.CrosswordPresenter;
 import interface_adapter.crossword.CrosswordViewModel;
+import interface_adapter.multiplechoice.QuizController;
+import interface_adapter.multiplechoice.QuizPresenter;
+import interface_adapter.multiplechoice.QuizViewModel;
+import interface_adapter.multiplechoice.ResultsViewModel;
 import use_case.crossword.start.StartCrosswordInputBoundary;
 import use_case.crossword.start.StartCrosswordInteractor;
 import use_case.crossword.submit.SubmitCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInteractor;
+import use_case.multiplechoice.QuestionDataAccessInterface;
+import use_case.multiplechoice.quiz.QuizInteractor;
+import use_case.multiplechoice.submit.SubmitAnswerInteractor;
+import data_access.multiplechoice.QuestionDAO;
 import data_access.SimpleDaoSelector;
 import view.CrosswordView;
 import use_case.game.GameInteractor;
@@ -88,6 +96,13 @@ public class AppBuilder {
     private CrosswordController crosswordController;
     private JPanel crosswordRoot;
 
+    // Multiple choice additions
+    private QuizViewModel quizViewModel;
+    private ResultsViewModel resultsViewModel;
+    private QuizPresenter quizPresenter;
+    private QuizController quizController;
+    private QuestionDataAccessInterface questionDAO;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
@@ -123,6 +138,30 @@ public class AppBuilder {
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
         connectionsGameView = new ConnectionsGameView(connectionsViewModel, null); // controller set later
         cardPanel.add(connectionsGameView, connectionsViewModel.getViewName());
+        return this;
+    }
+
+    public AppBuilder addMultipleChoiceViews() {
+        quizViewModel = new QuizViewModel();
+        resultsViewModel = new ResultsViewModel();
+        quizPresenter = new QuizPresenter(quizViewModel, resultsViewModel, viewManagerModel);
+
+        questionDAO = new QuestionDAO();
+        questionDAO.loadData();
+
+        QuizInteractor quizInteractor = new QuizInteractor(questionDAO, quizPresenter);
+        quizController = new QuizController(quizInteractor);
+
+        CategorySelectionView categorySelectionView = new CategorySelectionView(quizViewModel);
+        categorySelectionView.setQuizController(quizController);
+        cardPanel.add(categorySelectionView, categorySelectionView.getViewName());
+
+        QuizView quizView = new QuizView(quizController, quizViewModel);
+        cardPanel.add(quizView, quizView.getViewName());
+
+        ResultsView resultsView = new ResultsView(resultsViewModel, viewManagerModel);
+        cardPanel.add(resultsView, resultsView.getViewName());
+
         return this;
     }
 
@@ -249,6 +288,33 @@ public class AppBuilder {
         // Wire entrance from LoggedInView
         if (loggedInView != null) {
             loggedInView.setCrosswordController(crosswordController);
+        }
+
+        return this;
+    }
+
+    public AppBuilder addMultipleChoiceUseCase() {
+        // Wire submit answer interactor when quiz starts
+        // Create a new SubmitAnswerInteractor each time a quiz starts (when imagePath changes)
+        // to ensure it references the current QuizSession
+        quizViewModel.addPropertyChangeListener(evt -> {
+            if ("imagePath".equals(evt.getPropertyName())) {
+                if (quizController.getQuizInteractor().getCurrentSession() != null) {
+                    SubmitAnswerInteractor submitAnswerInteractor =
+                            new SubmitAnswerInteractor(
+                                    quizController.getQuizInteractor().getCurrentSession(),
+                                    quizPresenter,
+                                    quizPresenter);
+                    quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
+                }
+            }
+        });
+
+        // Wire controller into LoggedInView
+        if (loggedInView != null) {
+            loggedInView.setMultipleChoiceController(quizController);
+            // Wire ResultsViewModel to LoggedInView for high score updates
+            loggedInView.setResultsViewModel(resultsViewModel);
         }
 
         return this;

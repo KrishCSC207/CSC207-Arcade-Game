@@ -15,12 +15,14 @@ public class Main {
                 .addLoggedInView()
                 .addChangePasswordView()
                 .addConnectionsView()
+                .addMultipleChoiceViews()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addConnectionsUseCase()
                 .addCrosswordUseCase()
+                .addMultipleChoiceUseCase()
                 .build();
 
         application.pack();
