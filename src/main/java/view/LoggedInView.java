@@ -6,8 +6,8 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
 import interface_adapter.crossword.CrosswordController;
-import interface_adapter.multiplechoice.QuizController;
-import interface_adapter.multiplechoice.ResultsViewModel;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.ResultsViewModel;
 
 import javax.swing.*;
 import java.awt.*;
