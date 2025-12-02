@@ -6,7 +6,7 @@ import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.ChangePasswordPresenter;
-import interface_adapter.loggedIn.LoggedInViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
@@ -48,7 +48,7 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import use_case.password_validator.PasswordValidatorServiceDataAccessInterface;
+import use_case.password_validator.PasswordValidatorServiceDataAccessInterface; // NEW IMPORT
 import view.*;
 
 import javax.swing.*;
@@ -130,6 +130,7 @@ public class AppBuilder {
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
 
+        // UPDATED: Added passwordValidator to constructor
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
                 userDataAccessObject,
                 signupOutputBoundary,
@@ -156,6 +157,7 @@ public class AppBuilder {
         final ChangePasswordOutputBoundary changePasswordOutputBoundary = new ChangePasswordPresenter(viewManagerModel,
                 loggedInViewModel);
 
+        // UPDATED: Added passwordValidator to constructor
         final ChangePasswordInputBoundary changePasswordInteractor = new ChangePasswordInteractor(
                 userDataAccessObject,
                 changePasswordOutputBoundary,
@@ -229,10 +231,10 @@ public class AppBuilder {
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
         );
-        JPanel easy    = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
+        JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
         JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
-        JPanel hard    = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
-        JPanel exit    = CrosswordView.createExitPanel(crosswordViewModel);
+        JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
+        JPanel exit   = CrosswordView.createExitPanel(crosswordViewModel);
 
         crosswordRoot.add(decision, "DECISION");
         crosswordRoot.add(easy, "EASY");
