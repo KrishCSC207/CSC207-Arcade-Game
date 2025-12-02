@@ -1,4 +1,4 @@
-package interfaceadapter.multiple_choice;
+package interfaceadapter.multiplechoice;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

@@ -1,4 +1,4 @@
-package interfaceadapter.logged_in;
+package interfaceadapter.loggedin;
 
 /**
  * The State information representing the logged-in user.

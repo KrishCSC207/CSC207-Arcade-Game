@@ -1,4 +1,4 @@
-package interfaceadapter.change_password;
+package interfaceadapter.changepassword;
 
 import usecase.changepassword.ChangePasswordInputBoundary;
 import usecase.changepassword.ChangePasswordInputData;

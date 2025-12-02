@@ -1,7 +1,7 @@
-package interfaceadapter.change_password;
+package interfaceadapter.changepassword;
 
 import interfaceadapter.ViewManagerModel;
-import interfaceadapter.logged_in.LoggedInViewModel;
+import interfaceadapter.loggedin.LoggedInViewModel;
 import usecase.changepassword.ChangePasswordOutputBoundary;
 import usecase.changepassword.ChangePasswordOutputData;
 

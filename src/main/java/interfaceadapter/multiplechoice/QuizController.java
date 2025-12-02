@@ -1,4 +1,4 @@
-package interfaceadapter.multiple_choice;
+package interfaceadapter.multiplechoice;
 
 import usecase.multiplechoice.quiz.QuizInputBoundary;
 import usecase.multiplechoice.quiz.QuizInputData;

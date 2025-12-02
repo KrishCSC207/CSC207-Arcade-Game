@@ -1,4 +1,4 @@
-package interfaceadapter.multiple_choice;
+package interfaceadapter.multiplechoice;
 
 import interfaceadapter.ViewManagerModel;
 import usecase.multiplechoice.quiz.QuizOutputBoundary;
