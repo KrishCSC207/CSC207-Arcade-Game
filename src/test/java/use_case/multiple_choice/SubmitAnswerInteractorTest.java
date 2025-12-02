@@ -3,12 +3,12 @@ package use_case.multiple_choice;
 import entity.QuizQuestion;
 import entity.QuizSession;
 
-import use_case.quiz.QuizOutputBoundary;
-import use_case.quiz.QuizOutputData;
-import use_case.submit.SubmitAnswerInputData;
-import use_case.submit.SubmitAnswerInteractor;
-import use_case.submit.SubmitAnswerOutputBoundary;
-import use_case.submit.SubmitAnswerOutputData;
+import use_case.multiple_choice.quiz.QuizOutputBoundary;
+import use_case.multiple_choice.quiz.QuizOutputData;
+import use_case.multiple_choice.submit.SubmitAnswerInputData;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerOutputBoundary;
+import use_case.multiple_choice.submit.SubmitAnswerOutputData;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

@@ -23,6 +23,12 @@ public class QuizInteractor implements QuizInputBoundary {
     public void execute(QuizInputData inputData) {
         String category = inputData.getCategory();
         List<QuizQuestion> questions = questionDAO.getCategorizedQuestions(category);
+        
+        // Guard against null or empty questions list
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
+        
         currentSession = new QuizSession(questions);
 
         QuizQuestion firstQuestion = currentSession.getCurrentQuestion();
