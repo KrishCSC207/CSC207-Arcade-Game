@@ -1,9 +1,10 @@
 package interface_adapter.multiple_choice;
 
-import use_case.quiz.QuizOutputBoundary;
-import use_case.quiz.QuizOutputData;
-import use_case.submit.SubmitAnswerOutputBoundary;
-import use_case.submit.SubmitAnswerOutputData;
+import interface_adapter.ViewManagerModel;
+import use_case.multiple_choice.quiz.QuizOutputBoundary;
+import use_case.multiple_choice.quiz.QuizOutputData;
+import use_case.multiple_choice.submit.SubmitAnswerOutputBoundary;
+import use_case.multiple_choice.submit.SubmitAnswerOutputData;
 
 /**
  * Presenter that formats data from interactors for the ViewModels.
@@ -12,33 +13,35 @@ public class QuizPresenter implements QuizOutputBoundary, SubmitAnswerOutputBoun
 
     private final QuizViewModel quizViewModel;
     private final ResultsViewModel resultsViewModel;
+    private final ViewManagerModel viewManagerModel;
 
-    public QuizPresenter(QuizViewModel quizViewModel, ResultsViewModel resultsViewModel) {
+    public QuizPresenter(QuizViewModel quizViewModel, ResultsViewModel resultsViewModel, ViewManagerModel viewManagerModel) {
         this.quizViewModel = quizViewModel;
         this.resultsViewModel = resultsViewModel;
+        this.viewManagerModel = viewManagerModel;
     }
 
     @Override
     public void prepareQuizView(QuizOutputData data) {
         quizViewModel.setCurrentImagePath(data.getImagePath());
         quizViewModel.setQuestionProgressLabel(data.getQuestionProgress());
-
-        // Reset feedback state and incorrect button for new question
-        quizViewModel.setIncorrectButton(null);
+        quizViewModel.setSelectedButton(null);
         quizViewModel.setFeedbackState("NONE");
+
+        // Switch to quiz view when quiz starts
+        viewManagerModel.setState("quiz");
+        viewManagerModel.firePropertyChange();
     }
 
     @Override
     public void prepareSuccessView(SubmitAnswerOutputData data) {
-        // Record which button was selected
-        quizViewModel.setIncorrectButton(data.getSelectedAnswer());
-        // Inform view the choice was correct and display the green color
+        quizViewModel.setSelectedButton(data.getSelectedAnswer());
         quizViewModel.setFeedbackState("CORRECT");
     }
 
     @Override
     public void prepareFailView(SubmitAnswerOutputData data) {
-        quizViewModel.setIncorrectButton(data.getSelectedAnswer());
+        quizViewModel.setSelectedButton(data.getSelectedAnswer());
         quizViewModel.setFeedbackState("INCORRECT");
     }
 
@@ -46,5 +49,9 @@ public class QuizPresenter implements QuizOutputBoundary, SubmitAnswerOutputBoun
     public void prepareResultsView(double accuracy, long totalTimeMs) {
         resultsViewModel.setAccuracy(accuracy);
         resultsViewModel.setTotalTimeMs(totalTimeMs);
+
+        // Switch to results view when quiz is complete
+        viewManagerModel.setState("results");
+        viewManagerModel.firePropertyChange();
     }
 }

@@ -1,6 +1,7 @@
-package use_case;
+package use_case.multiple_choice;
 
 import entity.QuizQuestion;
+
 import java.util.List;
 
 /**
@@ -13,12 +14,10 @@ public interface QuestionDAI {
     void loadData();
 
     /**
-     * Gets a random selection of questions.
+     * Gets questions by category.
      *
-     * @param count Number of questions to retrieve
-     * @return List of random QuizQuestion objects
+     * @param category The category to filter by
+     * @return List of QuizQuestion objects in the category
      */
-    // List<QuizQuestion> getQuestions(int count);
-
     List<QuizQuestion> getCategorizedQuestions(String category);
 }

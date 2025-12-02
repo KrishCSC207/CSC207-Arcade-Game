@@ -9,11 +9,11 @@ import java.beans.PropertyChangeSupport;
  */
 public class QuizViewModel {
     private final PropertyChangeSupport support;
-    
+
     private String currentImagePath;
     private String questionProgressLabel;
     private String feedbackState;
-    private String incorrectButton;
+    private String selectedButton;
 
     public QuizViewModel() {
         this.support = new PropertyChangeSupport(this);
@@ -58,13 +58,13 @@ public class QuizViewModel {
         support.firePropertyChange("feedbackState", oldValue, state);
     }
 
-    public String getIncorrectButton() {
-        return incorrectButton;
+    public String getSelectedButton() {
+        return selectedButton;
     }
 
-    public void setIncorrectButton(String button) {
-        String oldValue = this.incorrectButton;
-        this.incorrectButton = button;
-        support.firePropertyChange("incorrectButton", oldValue, button);
+    public void setSelectedButton(String button) {
+        String oldValue = this.selectedButton;
+        this.selectedButton = button;
+        support.firePropertyChange("selectedButton", oldValue, button);
     }
 }

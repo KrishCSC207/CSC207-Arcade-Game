@@ -1,15 +1,18 @@
 package data_access;
 
 import entity.QuizQuestion;
-import use_case.QuestionDAI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import use_case.multiple_choice.QuestionDAI;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data access object for quiz questions.
+ */
 public class QuestionDAO implements QuestionDAI {
     private List<QuizQuestion> allQuestions = new ArrayList<>();
     private boolean loaded = false;

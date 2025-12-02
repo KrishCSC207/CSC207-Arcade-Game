@@ -1,4 +1,4 @@
-package use_case.submit;
+package use_case.multiple_choice.submit;
 
 /**
  * Input data for submitting an answer.

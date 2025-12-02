@@ -1,9 +1,9 @@
-package use_case.submit;
+package use_case.multiple_choice.submit;
 
 import entity.QuizQuestion;
 import entity.QuizSession;
-import use_case.quiz.QuizOutputBoundary;
-import use_case.quiz.QuizOutputData;
+import use_case.multiple_choice.quiz.QuizOutputBoundary;
+import use_case.multiple_choice.quiz.QuizOutputData;
 
 /**
  * Interactor for submitting and checking answers.
@@ -13,7 +13,7 @@ public class SubmitAnswerInteractor implements SubmitAnswerInputBoundary {
     private final SubmitAnswerOutputBoundary submitAnswerPresenter;
     private final QuizOutputBoundary quizPresenter;
 
-    public SubmitAnswerInteractor(QuizSession quizSession, 
+    public SubmitAnswerInteractor(QuizSession quizSession,
                                    SubmitAnswerOutputBoundary submitAnswerPresenter,
                                    QuizOutputBoundary quizPresenter) {
         this.quizSession = quizSession;
@@ -26,53 +26,41 @@ public class SubmitAnswerInteractor implements SubmitAnswerInputBoundary {
         String selectedAnswer = inputData.getSelectedAnswer();
         QuizQuestion currentQuestion = quizSession.getCurrentQuestion();
         String correctAnswer = currentQuestion.getCorrectAnswer();
-        
+
         boolean isCorrect = selectedAnswer.equals(correctAnswer);
-        
+
         SubmitAnswerOutputData outputData = new SubmitAnswerOutputData(
             isCorrect, selectedAnswer, correctAnswer
         );
-        
+
         if (isCorrect) {
-            // Record the correct answer
             quizSession.recordAnswer(true);
-            
-            // Notify presenter of success
             submitAnswerPresenter.prepareSuccessView(outputData);
-            
-            // Note: Do not advance immediately - let the view handle the delay
-            // and call advanceToNextQuestion() after showing the green highlight
         } else {
-            // Record the incorrect answer
             quizSession.recordAnswer(false);
-            
-            // Notify presenter of failure (do not advance)
             submitAnswerPresenter.prepareFailView(outputData);
         }
     }
-    
+
     /**
      * Advances to the next question after a correct answer.
      * Should be called by the controller after a delay to show feedback.
      */
     public void advance() {
-        // Advance to next question
         boolean hasMoreQuestions = quizSession.advanceToNextQuestion();
-        
+
         if (hasMoreQuestions) {
-            // Load next question
             QuizQuestion nextQuestion = quizSession.getCurrentQuestion();
-            String progressLabel = String.format("Question %d/%d", 
-                quizSession.getCurrentQuestionIndex() + 1, 
+            String progressLabel = String.format("Question %d/%d",
+                quizSession.getCurrentQuestionIndex() + 1,
                 quizSession.getTotalQuestions());
-            
+
             QuizOutputData quizOutputData = new QuizOutputData(
-                nextQuestion.getImagePath(), 
+                nextQuestion.getImagePath(),
                 progressLabel
             );
             quizPresenter.prepareQuizView(quizOutputData);
         } else {
-            // Quiz is over, show results
             quizSession.finishQuiz();
             double accuracy = quizSession.getAccuracy();
             long totalTime = quizSession.getTotalTime();

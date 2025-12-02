@@ -15,13 +15,14 @@ public class Main {
                 .addLoggedInView()
                 .addChangePasswordView()
                 .addConnectionsView()
+                .addMultipleChoiceViews()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addConnectionsUseCase()
-                .addQuizUseCase()      // ensure quiz wiring is installed
                 .addCrosswordUseCase()
+                .addMultipleChoiceUseCase()
                 .build();
 
         application.pack();

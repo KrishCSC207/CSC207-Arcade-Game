@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.PwnedPasswordDataAccessObject;
+import data_access.PwnedPasswordDataAccessObject; // NEW IMPORT
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.change_password.ChangePasswordController;
@@ -18,15 +18,22 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.connections.ConnectionsViewModel;
 import interface_adapter.connections.ConnectionsPresenter;
 import interface_adapter.connections.ConnectionsController;
-import use_case.quiz.QuizInputData;
+import use_case.multiple_choice.QuestionDAI;
 import view.ConnectionsGameView;
 import interface_adapter.crossword.CrosswordController;
 import interface_adapter.crossword.CrosswordPresenter;
 import interface_adapter.crossword.CrosswordViewModel;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.QuizPresenter;
+import interface_adapter.multiple_choice.QuizViewModel;
+import interface_adapter.multiple_choice.ResultsViewModel;
 import use_case.crossword.start.StartCrosswordInputBoundary;
 import use_case.crossword.start.StartCrosswordInteractor;
 import use_case.crossword.submit.SubmitCrosswordInputBoundary;
 import use_case.crossword.submit.SubmitCrosswordInteractor;
+import use_case.multiple_choice.quiz.QuizInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
+import data_access.QuestionDAO;
 import data_access.SimpleDaoSelector;
 import view.CrosswordView;
 import use_case.game.GameInteractor;
@@ -54,19 +61,6 @@ import view.*;
 
 import javax.swing.*;
 import java.awt.*;
-
-// NEW imports for Quiz wiring
-import data_access.QuestionDAO;
-import interface_adapter.multiple_choice.QuizController;
-import interface_adapter.multiple_choice.QuizPresenter;
-import interface_adapter.multiple_choice.QuizViewModel;
-import interface_adapter.multiple_choice.ResultsViewModel;
-import use_case.QuestionDAI;
-import use_case.quiz.QuizInteractor;
-import use_case.submit.SubmitAnswerInteractor;
-import use_case.quiz.QuizInputBoundary;
-import use_case.quiz.QuizInputData;
-import view.QuizView;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -102,8 +96,12 @@ public class AppBuilder {
     private CrosswordController crosswordController;
     private JPanel crosswordRoot;
 
-    // NEW field to hold the quiz window
-    private QuizView quizPanel;
+    // Multiple choice additions
+    private QuizViewModel quizViewModel;
+    private ResultsViewModel resultsViewModel;
+    private QuizPresenter quizPresenter;
+    private QuizController quizController;
+    private QuestionDAI questionDAO;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -140,6 +138,30 @@ public class AppBuilder {
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
         connectionsGameView = new ConnectionsGameView(connectionsViewModel, null); // controller set later
         cardPanel.add(connectionsGameView, connectionsViewModel.getViewName());
+        return this;
+    }
+
+    public AppBuilder addMultipleChoiceViews() {
+        quizViewModel = new QuizViewModel();
+        resultsViewModel = new ResultsViewModel();
+        quizPresenter = new QuizPresenter(quizViewModel, resultsViewModel, viewManagerModel);
+
+        questionDAO = new QuestionDAO();
+        questionDAO.loadData();
+
+        QuizInteractor quizInteractor = new QuizInteractor(questionDAO, quizPresenter);
+        quizController = new QuizController(quizInteractor);
+
+        CategorySelectionView categorySelectionView = new CategorySelectionView(quizViewModel);
+        categorySelectionView.setQuizController(quizController);
+        cardPanel.add(categorySelectionView, categorySelectionView.getViewName());
+
+        QuizView quizView = new QuizView(quizController, quizViewModel);
+        cardPanel.add(quizView, quizView.getViewName());
+
+        ResultsView resultsView = new ResultsView(resultsViewModel, viewManagerModel);
+        cardPanel.add(resultsView, resultsView.getViewName());
+
         return this;
     }
 
@@ -231,8 +253,10 @@ public class AppBuilder {
         final SimpleDaoSelector selector = new SimpleDaoSelector();
 
         // Interactors
-        final StartCrosswordInputBoundary startInteractor = new StartCrosswordInteractor(selector, crosswordPresenter);
-        final SubmitCrosswordInputBoundary submitInteractor = new SubmitCrosswordInteractor(selector, crosswordPresenter);
+        final StartCrosswordInputBoundary startInteractor =
+                new StartCrosswordInteractor(selector, crosswordPresenter);
+        final SubmitCrosswordInputBoundary submitInteractor =
+                new SubmitCrosswordInteractor(selector, crosswordPresenter);
 
         // Controller
         crosswordController = new CrosswordController(startInteractor, submitInteractor, selector);
@@ -240,8 +264,7 @@ public class AppBuilder {
         // Build a local CardLayout root for the crossword flow
         crosswordRoot = new JPanel(new CardLayout());
 
-        // Create panels via factory and register with local card layout
-
+        // ✅ FIXED: pass viewManagerModel as the first argument
         JPanel decision = CrosswordView.createDecisionPanel(
                 viewManagerModel,
                 crosswordController,
@@ -250,6 +273,7 @@ public class AppBuilder {
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "MEDIUM"),
                 () -> ((CardLayout) crosswordRoot.getLayout()).show(crosswordRoot, "HARD")
         );
+
         JPanel easy   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "EASY");
         JPanel medium = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "MEDIUM");
         JPanel hard   = CrosswordView.createPuzzlePanel(crosswordController, crosswordViewModel, "HARD");
@@ -273,56 +297,29 @@ public class AppBuilder {
         return this;
     }
 
-    // NEW: quiz use case moved into the builder so the LoggedInView button gets wired
-    public AppBuilder addQuizUseCase() {
-        // Repository for questions
-        QuestionDAI repository = new QuestionDAO();
 
-        // View models and presenter
-        QuizViewModel quizViewModel = new QuizViewModel();
-        ResultsViewModel resultsViewModel = new ResultsViewModel();
-        QuizPresenter presenter = new QuizPresenter(quizViewModel, resultsViewModel);
-
-        // Interactor and controller
-        QuizInteractor quizInteractor = new QuizInteractor(repository, presenter);
-        QuizController quizController = new QuizController(quizInteractor);
-
-        // Combined QuizView (embedded JPanel)
-        this.quizPanel = new QuizView(quizViewModel, resultsViewModel);
-        quizPanel.setQuizController(quizController);
-
-        // Add quizPanel to the app's central cardPanel under "multipleChoice"
-        cardPanel.add(quizPanel, "multipleChoice");
-
-        // Lazy-install SubmitAnswerInteractor when the quiz session becomes available
+    public AppBuilder addMultipleChoiceUseCase() {
+        // Wire submit answer interactor when quiz starts
+        // Create a new SubmitAnswerInteractor each time a quiz starts (when imagePath changes)
+        // to ensure it references the current QuizSession
         quizViewModel.addPropertyChangeListener(evt -> {
             if ("imagePath".equals(evt.getPropertyName())) {
-                if (!quizController.hasSubmitAnswerInteractor()
-                        && quizInteractor.getCurrentSession() != null) {
+                if (quizController.getQuizInteractor().getCurrentSession() != null) {
                     SubmitAnswerInteractor submitAnswerInteractor =
                             new SubmitAnswerInteractor(
-                                    quizInteractor.getCurrentSession(),
-                                    presenter,
-                                    presenter);
+                                    quizController.getQuizInteractor().getCurrentSession(),
+                                    quizPresenter,
+                                    quizPresenter);
                     quizController.setSubmitAnswerInteractor(submitAnswerInteractor);
                 }
-                // do NOT auto-show the quiz window here — the opener controls it
             }
         });
 
-        // Wire the quiz "opener" into the LoggedInView so its button will open the category selector.
+        // Wire controller into LoggedInView
         if (loggedInView != null) {
-            final QuizInputBoundary openSelection = new QuizInputBoundary() {
-                @Override
-                public void execute(QuizInputData inputData) {
-                    // ensure the app shows the quiz card, then open selection dialog in the embedded panel
-                    viewManagerModel.setState("multipleChoice");
-                    viewManagerModel.firePropertyChange();
-                    // open selection dialog on the panel
-                    quizPanel.showWithSelection();
-                }
-            };
-            loggedInView.setMultipleChoiceController(openSelection);
+            loggedInView.setMultipleChoiceController(quizController);
+            // Wire ResultsViewModel to LoggedInView for high score updates
+            loggedInView.setResultsViewModel(resultsViewModel);
         }
 
         return this;
@@ -334,13 +331,8 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        // DO NOT show quiz at startup; remove previous selectionView startup behavior
-
-        // Safely set initial card-state if signupView was created, otherwise skip
-        if (signupView != null) {
-            viewManagerModel.setState(signupView.getViewName());
-            viewManagerModel.firePropertyChange();
-        }
+        viewManagerModel.setState(signupView.getViewName());
+        viewManagerModel.firePropertyChange();
 
         return application;
     }

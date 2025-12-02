@@ -6,6 +6,8 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.connections.ConnectionsController;
 import interface_adapter.crossword.CrosswordController;
+import interface_adapter.multiple_choice.QuizController;
+import interface_adapter.multiple_choice.ResultsViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,10 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-// NEW: import quiz boundary types
-import use_case.quiz.QuizInputBoundary;
-import use_case.quiz.QuizInputData;
 
 /**
  * The View for when the user is logged into the program.
@@ -30,9 +28,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private LogoutController logoutController;
     private ConnectionsController connectionsController;
     private CrosswordController crosswordController;
-
-    // NEW: multiple choice use-case input boundary provided by AppBuilder
-    private QuizInputBoundary multipleChoiceController;
+    private QuizController multipleChoiceController;
 
     private final JLabel username;
 
@@ -125,6 +121,17 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             viewManagerModel.firePropertyChange();
         });
 
+        // Multiple Choice button action: switch to category selection view
+        multipleChoiceBtn.addActionListener(e -> {
+            if (multipleChoiceController != null) {
+                viewManagerModel.setState("category selection");
+                viewManagerModel.firePropertyChange();
+            } else {
+                JOptionPane.showMessageDialog(LoggedInView.this,
+                        "Multiple Choice is not available right now.");
+            }
+        });
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Add some space at the very top
@@ -141,18 +148,6 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         // Push bottom buttons to the bottom
         this.add(bottomButtons);
-
-        // NEW: Multiple Choice action wiring: prefer starting the use case if provided,
-        // otherwise fall back to switching to the multipleChoice view.
-        multipleChoiceBtn.addActionListener(e -> {
-            if (multipleChoiceController != null) {
-                // Start quiz with default category "GENERAL" (change as needed)
-                multipleChoiceController.execute(new QuizInputData("GENERAL"));
-            } else {
-                viewManagerModel.setState("multipleChoice");
-                viewManagerModel.firePropertyChange();
-            }
-        });
     }
 
     /**
@@ -172,6 +167,22 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             LoggedInState state = (LoggedInState) evt.getNewValue();
             // UPDATED: Concatenate "Hello, " with the username
             username.setText("Hello, " + state.getUsername());
+        } else if (evt.getPropertyName().equals("accuracy")) {
+            // Update high score when quiz completes
+            double accuracy = (double) evt.getNewValue();
+            int percentage = (int) (accuracy * 100);
+            
+            int currentHighScore = 0;
+            try {
+                currentHighScore = Integer.parseInt(highestScore);
+            } catch (NumberFormatException ex) {
+                currentHighScore = 0;
+            }
+            
+            if (percentage > currentHighScore) {
+                highestScore = String.valueOf(percentage);
+                highScoreLabel.setText("Highest Multiple Choice Score: " + highestScore + "%");
+            }
         }
     }
 
@@ -191,8 +202,11 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         this.crosswordController = crosswordController;
     }
 
-    // NEW: allow the AppBuilder to provide the quiz use-case boundary
-    public void setMultipleChoiceController(QuizInputBoundary multipleChoiceController) {
+    public void setMultipleChoiceController(QuizController multipleChoiceController) {
         this.multipleChoiceController = multipleChoiceController;
+    }
+
+    public void setResultsViewModel(ResultsViewModel resultsViewModel) {
+        resultsViewModel.addPropertyChangeListener(this);
     }
 }

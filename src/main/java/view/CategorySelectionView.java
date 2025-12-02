@@ -13,23 +13,24 @@ import java.beans.PropertyChangeListener;
 /**
  * View that allows the user to select a quiz category.
  */
-public class CategorySelectionView extends JFrame implements PropertyChangeListener {
+public class CategorySelectionView extends JPanel implements PropertyChangeListener {
+    private final String viewName = "category selection";
     private final QuizViewModel quizViewModel;
     private QuizController quizController;
 
     private final JButton submit;
     private final JRadioButton[] options;
-    private final String[] buttonTxt;
 
     public CategorySelectionView(QuizViewModel quizViewModel) {
         this.quizViewModel = quizViewModel;
         this.quizViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("choose a module", SwingConstants.CENTER);
+        final JLabel title = new JLabel("Choose a module", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
 
         final JPanel choices = new JPanel();
         options = new JRadioButton[6];
-        buttonTxt = new String[]{"Module 0", "Module 1", "Module 2", "Module 3", "Module 4", "Module 5"};
+        String[] buttonTxt = new String[]{"Module 0", "Module 1", "Module 2", "Module 3", "Module 4", "Module 5"};
         ButtonGroup group = new ButtonGroup();
         for (int i = 0; i < options.length; i++) {
             options[i] = new JRadioButton(buttonTxt[i]);
@@ -37,7 +38,7 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
             choices.add(options[i]);
         }
 
-        submit = new JButton("start");
+        submit = new JButton("Start");
         submit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -49,8 +50,7 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(
-                        CategorySelectionView.this, "Please select a module.");
+                JOptionPane.showMessageDialog(CategorySelectionView.this, "Please select a module first");
             }
         });
 
@@ -60,10 +60,10 @@ public class CategorySelectionView extends JFrame implements PropertyChangeListe
         JPanel bottom = new JPanel();
         bottom.add(submit);
         add(bottom, BorderLayout.SOUTH);
+    }
 
-        setSize(420, 180);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public String getViewName() {
+        return viewName;
     }
 
     public void setQuizController(QuizController quizController) {

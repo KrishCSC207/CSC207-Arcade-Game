@@ -1,7 +1,7 @@
-package use_case.quiz;
+package use_case.multiple_choice.quiz;
 
 /**
- * Input data object encapsulating question categories.
+ * Input data for starting a quiz.
  */
 public class QuizInputData {
     private final String category;
