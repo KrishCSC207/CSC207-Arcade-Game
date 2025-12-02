@@ -1,10 +1,10 @@
 package interface_adapter.multiple_choice;
 
 import interface_adapter.ViewManagerModel;
-import use_case.multiplechoice.quiz.QuizOutputBoundary;
-import use_case.multiplechoice.quiz.QuizOutputData;
-import use_case.multiplechoice.submit.SubmitAnswerOutputBoundary;
-import use_case.multiplechoice.submit.SubmitAnswerOutputData;
+import use_case.multiple_choice.quiz.QuizOutputBoundary;
+import use_case.multiple_choice.quiz.QuizOutputData;
+import use_case.multiple_choice.submit.SubmitAnswerOutputBoundary;
+import use_case.multiple_choice.submit.SubmitAnswerOutputData;
 
 /**
  * Presenter that formats data from interactors for the ViewModels.

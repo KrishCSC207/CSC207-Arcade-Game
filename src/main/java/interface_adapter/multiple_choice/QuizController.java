@@ -1,9 +1,9 @@
 package interface_adapter.multiple_choice;
 
-import use_case.multiplechoice.quiz.QuizInputData;
-import use_case.multiplechoice.quiz.QuizInteractor;
-import use_case.multiplechoice.submit.SubmitAnswerInputData;
-import use_case.multiplechoice.submit.SubmitAnswerInteractor;
+import use_case.multiple_choice.quiz.QuizInputData;
+import use_case.multiple_choice.quiz.QuizInteractor;
+import use_case.multiple_choice.submit.SubmitAnswerInputData;
+import use_case.multiple_choice.submit.SubmitAnswerInteractor;
 
 /**
  * Controller that converts UI actions to use case inputs.
