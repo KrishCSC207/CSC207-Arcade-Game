@@ -408,4 +408,55 @@ public class GameSubmitGuessInteractorTest {
         assertFalse(presenter.winCalled.get());
         assertFalse(presenter.gameOverCalled.get());
     }
+
+    @Test
+    void presentCorrectGuess_includesCategoryWords() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("Animals", Arrays.asList("cat","dog","cow","pig"));
+        cats.put("Fruits", Arrays.asList("apple","pear","banana","kiwi"));
+
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(4);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        List<String> selection = Arrays.asList("apple","pear","banana","kiwi");
+        interactor.execute(selection);
+
+        // ensure presenter received the exact category words list
+        assertEquals(cats.get("Fruits"), presenter.correctCategoryWords);
+        assertEquals("Fruits", presenter.correctCategoryName);
+    }
+
+    @Test
+    void winCondition_triggersPresentWin() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        cats.put("B", Arrays.asList("b1","b2","b3","b4"));
+
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(3);
+        // mark one category as already found so that finding the other causes a win
+        state.addFoundCategory(new Category("A", cats.get("A")));
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        List<String> selection = Arrays.asList("b1","b2","b3","b4");
+        interactor.execute(selection);
+
+        assertTrue(presenter.winCalled.get(), "Winning selection should trigger presentWin");
+        assertEquals("B", presenter.correctCategoryName);
+    }
+
+    @Test
+    void getRemainingWords_nullArgs_returnsEmpty() {
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, new TestGuessPresenter());
+        List<String> rem = interactor.getRemainingWords(null, null);
+        assertNotNull(rem);
+        assertTrue(rem.isEmpty(), "getRemainingWords(null, null) should return empty list");
+    }
 }
