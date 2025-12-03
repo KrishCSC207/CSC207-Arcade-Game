@@ -39,15 +39,24 @@ public class GameSubmitGuessInteractor {
             return; // Game not loaded or is already over
         }
 
+        // defensive: ensure we have 4 selections
+        if (selectedWords == null || selectedWords.size() < 1) {
+            return;
+        }
+
         Category matchedCategory = findMatchingCategory(game, selectedWords);
 
         if (matchedCategory != null) {
             // --- CORRECT GUESS ---
 
-            // Check if this category was already found
-            if (gameState.getFoundCategories().contains(matchedCategory)) {
+            // Check if this category was already found (compare by name to avoid object-equality issues)
+            boolean alreadyFound = gameState.getFoundCategories().stream()
+                    .anyMatch(c -> c.getCategoryName().equals(matchedCategory.getCategoryName()));
+
+            if (alreadyFound) {
                 guessPresenter.presentAlreadyFound();
             } else {
+                // Add the canonical category from the game (matchedCategory) to the found list
                 gameState.addFoundCategory(matchedCategory);
 
                 // Get the words still on the board
