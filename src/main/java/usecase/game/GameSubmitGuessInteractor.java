@@ -44,6 +44,16 @@ public class GameSubmitGuessInteractor {
             return;
         }
 
+        // explicit: empty selection (should not happen, but for coverage)
+        if (selectedWords.isEmpty()) {
+            return;
+        }
+
+        // explicit: no categories in game (edge case)
+        if (game.getCategories() == null || game.getCategories().isEmpty()) {
+            return;
+        }
+
         Category matchedCategory = findMatchingCategory(game, selectedWords);
 
         if (matchedCategory != null) {
