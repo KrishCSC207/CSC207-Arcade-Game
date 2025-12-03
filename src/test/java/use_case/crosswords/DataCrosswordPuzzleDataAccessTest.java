@@ -72,4 +72,35 @@ class DataCrosswordPuzzleDataAccessTest {
         // Assert
         assertEquals(expectedSolutions, actualSolutions);
     }
+    @Test
+    void testLoadPuzzleWithNullDifficulty() {
+        DataCrosswordPuzzleDataAccess dataAccess = new DataCrosswordPuzzleDataAccess(null);
+
+        CrosswordPuzzle puzzle = dataAccess.loadPuzzle();
+
+        assertNotNull(puzzle);
+        Set<String> expectedSolutions = new HashSet<>(List.of("Adapter", "String", "Integer", "Regex"));
+        assertEquals(expectedSolutions, new HashSet<>(puzzle.getSolutions()));
+    }
+
+    @Test
+    void testLoadPuzzleWithInvalidDifficulty() {
+        DataCrosswordPuzzleDataAccess dataAccess = new DataCrosswordPuzzleDataAccess("NON_EXISTENT_MODE");
+
+        CrosswordPuzzle puzzle = dataAccess.loadPuzzle();
+
+        assertNotNull(puzzle);
+        Set<String> expectedSolutions = new HashSet<>(List.of("Adapter", "String", "Integer", "Regex"));
+        assertEquals(expectedSolutions, new HashSet<>(puzzle.getSolutions()));
+    }
+
+    @Test
+    void testGetSolutionsBeforeLoadingPuzzle() {
+        DataCrosswordPuzzleDataAccess dataAccess = new DataCrosswordPuzzleDataAccess("EASY");
+
+        List<String> solutions = dataAccess.getCurrentPuzzleSolutions();
+
+        assertNotNull(solutions);
+        assertEquals(0, solutions.size(), "Solutions should be empty if no puzzle is loaded");
+    }
 }

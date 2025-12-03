@@ -15,15 +15,12 @@ class StartCrosswordInteractorTest {
 
     @Test
     void testStartCrossword() {
-        // Arrange
         MockCrosswordPuzzleDataAccess dataAccess = new MockCrosswordPuzzleDataAccess();
         MockStartCrosswordPresenter presenter = new MockStartCrosswordPresenter();
         StartCrosswordInteractor interactor = new StartCrosswordInteractor(dataAccess, presenter);
 
-        // Act
         interactor.startCrossword();
 
-        // Assert
         assertEquals("test_id", presenter.presentedId);
         assertEquals("test_path", presenter.presentedImagePath);
         assertEquals(2, presenter.presentedNumSolutions);
