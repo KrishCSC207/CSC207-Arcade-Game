@@ -2,9 +2,9 @@ package usecase.crosswords;
 
 import entity.CrosswordPuzzle;
 import org.junit.jupiter.api.Test;
-import use_case.crossword.CrosswordPuzzleDataAccessInterface;
-import use_case.crossword.start.StartCrosswordInteractor;
-import use_case.crossword.start.StartCrosswordOutputBoundary;
+import usecase.crossword.CrosswordPuzzleDataAccessInterface;
+import usecase.crossword.start.StartCrosswordInteractor;
+import usecase.crossword.start.StartCrosswordOutputBoundary;
 
 import java.util.ArrayList;
 import java.util.List;

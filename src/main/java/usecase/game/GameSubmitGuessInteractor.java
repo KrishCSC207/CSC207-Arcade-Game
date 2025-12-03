@@ -40,7 +40,7 @@ public class GameSubmitGuessInteractor {
         }
 
         // defensive: ensure we have 4 selections
-        if (selectedWords == null || selectedWords.size() < 1) {
+        if (selectedWords == null || selectedWords.size() != 4) {
             return;
         }
 
@@ -83,10 +83,16 @@ public class GameSubmitGuessInteractor {
     }
 
     /**
-     * Helper method to check if the 4 words belong to a single category.
+     * Helper method to check if the selected words all belong to a single category.
+     * Made public for testing.
      * @return The matching Category if all words belong to one, or null otherwise.
      */
-    private Category findMatchingCategory(Game game, List<String> selectedWords) {
+    public Category findMatchingCategory(Game game, List<String> selectedWords) {
+        // Defensive: null or empty selection -> no match
+        if (selectedWords == null || selectedWords.isEmpty()) {
+            return null;
+        }
+
         // Find the category of the first word
         Category firstCategory = null;
         for (Category category : game.getCategories()) {
@@ -96,8 +102,9 @@ public class GameSubmitGuessInteractor {
             }
         }
 
+        // If the first word does not belong to any category, no match
         if (firstCategory == null) {
-            return null; // Should not happen
+            return null;
         }
 
         // Check if all other words are in that same category
@@ -112,8 +119,13 @@ public class GameSubmitGuessInteractor {
 
     /**
      * Helper method to get all words that are not in a "found" category.
+     * Made public for testing.
      */
-    private List<String> getRemainingWords(Game game, GameState gameState) {
+    public List<String> getRemainingWords(Game game, GameState gameState) {
+        if (game == null || gameState == null) {
+            return java.util.Collections.emptyList();
+        }
+
         List<String> foundWords = gameState.getFoundCategories().stream()
                 .flatMap(category -> category.getWords().stream())
                 .collect(Collectors.toList());

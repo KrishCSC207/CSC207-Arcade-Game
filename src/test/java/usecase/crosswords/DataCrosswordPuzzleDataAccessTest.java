@@ -1,6 +1,6 @@
 package usecase.crosswords;
 
-import data_access.DataCrosswordPuzzleDataAccess;
+import dataaccess.DataCrosswordPuzzleDataAccess;
 import entity.CrosswordPuzzle;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
 package usecase.crosswords;
 
 import org.junit.jupiter.api.Test;
-import use_case.crossword.CrosswordPuzzleDataAccessInterface;
-import use_case.crossword.submit.*;
+import usecase.crossword.CrosswordPuzzleDataAccessInterface;
+import usecase.crossword.submit.*;
 
 import java.util.ArrayList;
 import java.util.List;

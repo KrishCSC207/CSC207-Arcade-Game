@@ -44,6 +44,7 @@ public class GameSubmitGuessInteractorTest {
         Integer mistakesRemaining = null;
         AtomicBoolean winCalled = new AtomicBoolean(false);
         AtomicBoolean gameOverCalled = new AtomicBoolean(false);
+        String gameOverMessage = null; // record message for assertions
 
         @Override
         public void presentCorrectGuess(String categoryName, List<String> categoryWords, List<String> remainingWords) {
@@ -70,6 +71,7 @@ public class GameSubmitGuessInteractorTest {
         @Override
         public void presentGameOver(String message) {
             this.gameOverCalled.set(true);
+            this.gameOverMessage = message;
         }
     }
 
@@ -159,5 +161,213 @@ public class GameSubmitGuessInteractorTest {
         assertNotNull(presenter.mistakesRemaining);
         assertEquals(0, presenter.mistakesRemaining.intValue(), "Mistakes should be decremented to 0");
         assertTrue(presenter.gameOverCalled.get(), "Game over should be presented when mistakes exhausted");
+        assertEquals("You're out of mistakes!", presenter.gameOverMessage, "Game over message should match");
+    }
+
+    @Test
+    void incorrectMismatch_decrementsOnly() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        cats.put("B", Arrays.asList("b1","b2","b3","b4"));
+
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2); // allow >1 mistake so no game over
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        // first word in A, second in B -> should trigger mismatch after firstCategory set
+        List<String> selection = Arrays.asList("a1","b1","a2","a3");
+        interactor.execute(selection);
+
+        // should decrement mistakes to 1 and NOT call game over
+        assertNotNull(presenter.mistakesRemaining);
+        assertEquals(1, presenter.mistakesRemaining.intValue());
+        assertFalse(presenter.gameOverCalled.get());
+        // no correct/alreadyFound/win should be reported
+        assertNull(presenter.correctCategoryName);
+        assertFalse(presenter.alreadyFound);
+        assertFalse(presenter.winCalled.get());
+    }
+
+    // New tests for early-return branches and null/empty selections
+
+    @Test
+    void noActiveGame_doesNothing() {
+        // repo has no active game/state
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        List<String> selection = Arrays.asList("x1","x2","x3","x4");
+        interactor.execute(selection);
+
+        // nothing should be presented
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.alreadyFound);
+        assertFalse(presenter.winCalled.get());
+        assertFalse(presenter.gameOverCalled.get());
+    }
+
+    @Test
+    void noActiveState_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("C", Arrays.asList("c1","c2","c3","c4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        // only set game, not state
+        repo.save(game, null);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        interactor.execute(Arrays.asList("c1","c2","c3","c4"));
+
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.winCalled.get());
+    }
+
+    @Test
+    void gameStateAlreadyOver_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("C", Arrays.asList("c1","c2","c3","c4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        // GameState with 0 allowed mistakes => already game over
+        GameState state = new GameState(0);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        interactor.execute(Arrays.asList("c1","c2","c3","c4"));
+
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.winCalled.get());
+    }
+
+    @Test
+    void emptySelection_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        interactor.execute(Collections.emptyList());
+
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.alreadyFound);
+        assertFalse(presenter.winCalled.get());
+        assertFalse(presenter.gameOverCalled.get());
+    }
+
+    @Test
+    void nullSelection_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("B", Arrays.asList("b1","b2","b3","b4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        interactor.execute(null);
+
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.alreadyFound);
+        assertFalse(presenter.winCalled.get());
+        assertFalse(presenter.gameOverCalled.get());
+    }
+
+    @Test
+    void findMatchingCategory_returnsCorrectCategoryOrNull() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        cats.put("B", Arrays.asList("b1","b2","b3","b4"));
+        Game game = TestGameFactory.createGame("G", cats);
+
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, new TestGuessPresenter());
+
+        // All from A
+        assertNotNull(interactor.findMatchingCategory(game, Arrays.asList("a1","a2","a3","a4")));
+        // Mixed
+        assertNull(interactor.findMatchingCategory(game, Arrays.asList("a1","b1","a2","a3")));
+        // Not in any category
+        assertNull(interactor.findMatchingCategory(game, Arrays.asList("x","y","z","w")));
+        // Empty selection
+        assertNull(interactor.findMatchingCategory(game, Collections.emptyList()));
+        // Null selection
+        assertNull(interactor.findMatchingCategory(game, null));
+    }
+
+    @Test
+    void getRemainingWords_returnsCorrectly() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        cats.put("B", Arrays.asList("b1","b2","b3","b4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2);
+        // No categories found yet
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, new TestGuessPresenter());
+        List<String> all = interactor.getRemainingWords(game, state);
+        assertEquals(8, all.size());
+
+        // Mark A as found
+        state.addFoundCategory(new Category("A", cats.get("A")));
+        List<String> rem = interactor.getRemainingWords(game, state);
+        for (String w : cats.get("A")) {
+            assertFalse(rem.contains(w));
+        }
+        for (String w : cats.get("B")) {
+            assertTrue(rem.contains(w));
+        }
+    }
+
+    @Test
+    void selectionNotFour_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        // 3 words
+        interactor.execute(Arrays.asList("a1","a2","a3"));
+        // 5 words
+        interactor.execute(Arrays.asList("a1","a2","a3","a4","a5"));
+
+        assertNull(presenter.correctCategoryName);
+        assertNull(presenter.mistakesRemaining);
+        assertFalse(presenter.alreadyFound);
+        assertFalse(presenter.winCalled.get());
+        assertFalse(presenter.gameOverCalled.get());
+    }
+
+    @Test
+    void selectionWithWordsNotInAnyCategory_doesNothing() {
+        Map<String, List<String>> cats = new LinkedHashMap<>();
+        cats.put("A", Arrays.asList("a1","a2","a3","a4"));
+        Game game = TestGameFactory.createGame("G", cats);
+        GameState state = new GameState(2);
+        repo.save(game, state);
+
+        TestGuessPresenter presenter = new TestGuessPresenter();
+        GameSubmitGuessInteractor interactor = new GameSubmitGuessInteractor(repo, presenter);
+
+        interactor.execute(Arrays.asList("x","y","z","w"));
+
+        assertNotNull(presenter.mistakesRemaining);
+        assertEquals(1, presenter.mistakesRemaining.intValue());
     }
 }
