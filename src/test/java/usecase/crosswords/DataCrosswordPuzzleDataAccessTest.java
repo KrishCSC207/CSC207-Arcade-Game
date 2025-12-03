@@ -1,4 +1,4 @@
-package use_case.crosswords;
+package usecase.crosswords;
 
 import data_access.DataCrosswordPuzzleDataAccess;
 import entity.CrosswordPuzzle;

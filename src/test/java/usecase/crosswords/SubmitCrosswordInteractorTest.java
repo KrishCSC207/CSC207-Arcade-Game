@@ -1,4 +1,4 @@
-package use_case.crosswords;
+package usecase.crosswords;
 
 import org.junit.jupiter.api.Test;
 import use_case.crossword.CrosswordPuzzleDataAccessInterface;

@@ -1,4 +1,4 @@
-package use_case.crosswords;
+package usecase.crosswords;
 
 import entity.CrosswordPuzzle;
 import org.junit.jupiter.api.Test;
