@@ -1,8 +1,8 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-import interface_adapter.crossword.CrosswordController;
-import interface_adapter.crossword.CrosswordViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.crossword.CrosswordController;
+import interfaceadapter.crossword.CrosswordViewModel;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,9 +1,9 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-import interface_adapter.change_password.ChangePasswordController;
-import interface_adapter.logged_in.LoggedInState;
-import interface_adapter.logged_in.LoggedInViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.changepassword.ChangePasswordController;
+import interfaceadapter.loggedin.LoggedInState;
+import interfaceadapter.loggedin.LoggedInViewModel;
 
 import javax.swing.*;
 import java.awt.*;

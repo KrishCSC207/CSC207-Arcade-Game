@@ -1,7 +1,7 @@
 package view;
 
-import interface_adapter.multiple_choice.ResultsViewModel;
-import interface_adapter.ViewManagerModel;
+import interfaceadapter.multiplechoice.ResultsViewModel;
+import interfaceadapter.ViewManagerModel;
 
 import javax.swing.*;
 import java.awt.*;
