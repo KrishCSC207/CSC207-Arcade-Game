@@ -137,6 +137,7 @@ public class AppBuilder {
         connectionsViewModel = new ConnectionsViewModel();
         connectionsPresenter = new ConnectionsPresenter(connectionsViewModel, viewManagerModel);
         connectionsGameView = new ConnectionsGameView(connectionsViewModel, null); // controller set later
+        connectionsGameView.setViewManagerModel(viewManagerModel); // Wire ViewManagerModel for Back button
         cardPanel.add(connectionsGameView, connectionsViewModel.getViewName());
         return this;
     }
