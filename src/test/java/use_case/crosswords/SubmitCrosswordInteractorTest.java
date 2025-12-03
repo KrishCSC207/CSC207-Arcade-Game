@@ -64,4 +64,31 @@ class SubmitCrosswordInteractorTest {
             this.outputData = outputData;
         }
     }
+    @Test
+    void testSubmitMismatchedCount() {
+        MockCrosswordPuzzleDataAccess dataAccess = new MockCrosswordPuzzleDataAccess();
+        MockSubmitCrosswordPresenter presenter = new MockSubmitCrosswordPresenter();
+        SubmitCrosswordInteractor interactor = new SubmitCrosswordInteractor(dataAccess, presenter);
+
+        List<String> userAnswers = List.of("solution1");
+        SubmitCrosswordInputData inputData = new SubmitCrosswordInputData(userAnswers, System.currentTimeMillis());
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.outputData.isAllCorrect());
+    }
+
+    @Test
+    void testSubmitCaseAndWhitespace() {
+        MockCrosswordPuzzleDataAccess dataAccess = new MockCrosswordPuzzleDataAccess();
+        MockSubmitCrosswordPresenter presenter = new MockSubmitCrosswordPresenter();
+        SubmitCrosswordInteractor interactor = new SubmitCrosswordInteractor(dataAccess, presenter);
+
+        List<String> userAnswers = List.of("  SOLUTION1  ", "SOLUTION2");
+        SubmitCrosswordInputData inputData = new SubmitCrosswordInputData(userAnswers, System.currentTimeMillis());
+
+        interactor.execute(inputData);
+
+        assertTrue(presenter.outputData.isAllCorrect());
+    }
 }
